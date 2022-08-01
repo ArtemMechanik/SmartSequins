@@ -1,0 +1,516 @@
+
+SmartSequinse8.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000266  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000002da  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000005  00800060  00800060  000002da  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  000002da  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000030c  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000058  00000000  00000000  00000348  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   00000684  00000000  00000000  000003a0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 000004a0  00000000  00000000  00000a24  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   000004a4  00000000  00000000  00000ec4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  000000c8  00000000  00000000  00001368  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    000003c1  00000000  00000000  00001430  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    0000024c  00000000  00000000  000017f1  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000048  00000000  00000000  00001a3d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	09 c0       	rjmp	.+18     	; 0x14 <__ctors_end>
+   2:	17 c0       	rjmp	.+46     	; 0x32 <__vector_1>
+   4:	15 c0       	rjmp	.+42     	; 0x30 <__bad_interrupt>
+   6:	14 c0       	rjmp	.+40     	; 0x30 <__bad_interrupt>
+   8:	13 c0       	rjmp	.+38     	; 0x30 <__bad_interrupt>
+   a:	12 c0       	rjmp	.+36     	; 0x30 <__bad_interrupt>
+   c:	7c c0       	rjmp	.+248    	; 0x106 <__vector_6>
+   e:	10 c0       	rjmp	.+32     	; 0x30 <__bad_interrupt>
+  10:	0f c0       	rjmp	.+30     	; 0x30 <__bad_interrupt>
+  12:	0e c0       	rjmp	.+28     	; 0x30 <__bad_interrupt>
+
+00000014 <__ctors_end>:
+  14:	11 24       	eor	r1, r1
+  16:	1f be       	out	0x3f, r1	; 63
+  18:	cf e9       	ldi	r28, 0x9F	; 159
+  1a:	cd bf       	out	0x3d, r28	; 61
+
+0000001c <__do_clear_bss>:
+  1c:	20 e0       	ldi	r18, 0x00	; 0
+  1e:	a0 e6       	ldi	r26, 0x60	; 96
+  20:	b0 e0       	ldi	r27, 0x00	; 0
+  22:	01 c0       	rjmp	.+2      	; 0x26 <.do_clear_bss_start>
+
+00000024 <.do_clear_bss_loop>:
+  24:	1d 92       	st	X+, r1
+
+00000026 <.do_clear_bss_start>:
+  26:	a5 36       	cpi	r26, 0x65	; 101
+  28:	b2 07       	cpc	r27, r18
+  2a:	e1 f7       	brne	.-8      	; 0x24 <.do_clear_bss_loop>
+  2c:	e6 d0       	rcall	.+460    	; 0x1fa <main>
+  2e:	19 c1       	rjmp	.+562    	; 0x262 <_exit>
+
+00000030 <__bad_interrupt>:
+  30:	e7 cf       	rjmp	.-50     	; 0x0 <__vectors>
+
+00000032 <__vector_1>:
+unsigned char volatile sequinse_state = 0; // состояние пайетки
+unsigned char volatile sequinse_state_previous = 0;
+
+unsigned char volatile sleep_FLAG = 0;
+
+ISR (INT0_vect) {
+  32:	1f 92       	push	r1
+  34:	0f 92       	push	r0
+  36:	0f b6       	in	r0, 0x3f	; 63
+  38:	0f 92       	push	r0
+  3a:	11 24       	eor	r1, r1
+  3c:	8f 93       	push	r24
+	
+	if(sleep_FLAG==1) {						// если это прерывание из спящего режима, то перенастраиваем прерывание
+  3e:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+  42:	81 30       	cpi	r24, 0x01	; 1
+  44:	31 f4       	brne	.+12     	; 0x52 <__DATA_REGION_LENGTH__+0x12>
+		GIMSK = (1<<INT0);
+  46:	80 e4       	ldi	r24, 0x40	; 64
+  48:	8b bf       	out	0x3b, r24	; 59
+		MCUCR = (0<<ISC01)|(1<<ISC00);		// переключаем прерывание в режим фиксирования смены логического уроня
+  4a:	81 e0       	ldi	r24, 0x01	; 1
+  4c:	85 bf       	out	0x35, r24	; 53
+		sleep_FLAG = 0;						// сьрасываем флаг режима сна
+  4e:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
+	}
+	
+	switch(current_step) {
+  52:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <current_step>
+  56:	82 30       	cpi	r24, 0x02	; 2
+  58:	59 f1       	breq	.+86     	; 0xb0 <__stack+0x11>
+  5a:	28 f4       	brcc	.+10     	; 0x66 <__DATA_REGION_LENGTH__+0x26>
+  5c:	88 23       	and	r24, r24
+  5e:	41 f0       	breq	.+16     	; 0x70 <__DATA_REGION_LENGTH__+0x30>
+  60:	81 30       	cpi	r24, 0x01	; 1
+  62:	91 f0       	breq	.+36     	; 0x88 <__DATA_REGION_LENGTH__+0x48>
+  64:	4a c0       	rjmp	.+148    	; 0xfa <__stack+0x5b>
+  66:	84 30       	cpi	r24, 0x04	; 4
+  68:	89 f1       	breq	.+98     	; 0xcc <__stack+0x2d>
+  6a:	85 30       	cpi	r24, 0x05	; 5
+  6c:	d9 f1       	breq	.+118    	; 0xe4 <__stack+0x45>
+  6e:	45 c0       	rjmp	.+138    	; 0xfa <__stack+0x5b>
+		case 0:
+			if(!(PINB&(1<<IN_PIN))) {		// ловим нисходящий фронт начала посылки
+  70:	b1 99       	sbic	0x16, 1	; 22
+  72:	43 c0       	rjmp	.+134    	; 0xfa <__stack+0x5b>
+				TCNT0 = 0;					// готовимся считать количество времени, прошедшее от нисходящего фронта
+  74:	12 be       	out	0x32, r1	; 50
+				TIMSK0 |= (1<<OCIE0A);
+  76:	89 b7       	in	r24, 0x39	; 57
+  78:	84 60       	ori	r24, 0x04	; 4
+  7a:	89 bf       	out	0x39, r24	; 57
+				time_counter = 0;
+  7c:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <time_counter>
+				current_step = 1;
+  80:	81 e0       	ldi	r24, 0x01	; 1
+  82:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <current_step>
+  86:	39 c0       	rjmp	.+114    	; 0xfa <__stack+0x5b>
+			}
+		break;
+		case 1:								// восходящий фронт первого бита посылки		
+			if(time_counter > 3) {			// если отсчитали больше тёх тактов, то это начало посылки
+  88:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <time_counter>
+  8c:	84 30       	cpi	r24, 0x04	; 4
+  8e:	60 f0       	brcs	.+24     	; 0xa8 <__stack+0x9>
+				TCNT0 = 0;							
+  90:	12 be       	out	0x32, r1	; 50
+				TIFR0 = (1<<OCF0A);
+  92:	84 e0       	ldi	r24, 0x04	; 4
+  94:	88 bf       	out	0x38, r24	; 56
+				time_counter = 0;
+  96:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <time_counter>
+				OUT_LOW;
+  9a:	88 b3       	in	r24, 0x18	; 24
+  9c:	8b 7f       	andi	r24, 0xFB	; 251
+  9e:	88 bb       	out	0x18, r24	; 24
+				current_step = 2;
+  a0:	82 e0       	ldi	r24, 0x02	; 2
+  a2:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <current_step>
+  a6:	29 c0       	rjmp	.+82     	; 0xfa <__stack+0x5b>
+			}
+			else current_step = 5;			// если три такта не прошло, то это ошибка
+  a8:	85 e0       	ldi	r24, 0x05	; 5
+  aa:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <current_step>
+  ae:	25 c0       	rjmp	.+74     	; 0xfa <__stack+0x5b>
+		break;
+		case 2:								// нисходящий фронт первого бита посылки
+			if(time_counter == 1) {			// определяем длительность первого бита
+  b0:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <time_counter>
+  b4:	81 30       	cpi	r24, 0x01	; 1
+  b6:	19 f4       	brne	.+6      	; 0xbe <__stack+0x1f>
+				sequinse_state = 0;
+  b8:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <sequinse_state>
+  bc:	03 c0       	rjmp	.+6      	; 0xc4 <__stack+0x25>
+			}
+			else {
+				sequinse_state = 1;
+  be:	81 e0       	ldi	r24, 0x01	; 1
+  c0:	80 93 62 00 	sts	0x0062, r24	; 0x800062 <sequinse_state>
+			}
+			current_step = 4;
+  c4:	84 e0       	ldi	r24, 0x04	; 4
+  c6:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <current_step>
+		break;
+  ca:	17 c0       	rjmp	.+46     	; 0xfa <__stack+0x5b>
+		case 4:								// остальные биты передаём без изменений
+			if(!(PINB&(1<<IN_PIN))) OUT_LOW;	
+  cc:	b1 99       	sbic	0x16, 1	; 22
+  ce:	04 c0       	rjmp	.+8      	; 0xd8 <__stack+0x39>
+  d0:	88 b3       	in	r24, 0x18	; 24
+  d2:	8b 7f       	andi	r24, 0xFB	; 251
+  d4:	88 bb       	out	0x18, r24	; 24
+  d6:	03 c0       	rjmp	.+6      	; 0xde <__stack+0x3f>
+			else					OUT_HIGH;
+  d8:	88 b3       	in	r24, 0x18	; 24
+  da:	84 60       	ori	r24, 0x04	; 4
+  dc:	88 bb       	out	0x18, r24	; 24
+			time_counter = 0;				// если приняли бит, то сбрасываем счётчик
+  de:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <time_counter>
+		break;
+  e2:	0b c0       	rjmp	.+22     	; 0xfa <__stack+0x5b>
+		case 5:
+			TIMSK0 &=(~(1<<OCIE0A));
+  e4:	89 b7       	in	r24, 0x39	; 57
+  e6:	8b 7f       	andi	r24, 0xFB	; 251
+  e8:	89 bf       	out	0x39, r24	; 57
+			OUT_HIGH;						// держим на линии высокий уровень, чтобы остальные пайетки мирно спали
+  ea:	88 b3       	in	r24, 0x18	; 24
+  ec:	84 60       	ori	r24, 0x04	; 4
+  ee:	88 bb       	out	0x18, r24	; 24
+			current_step = 0;
+  f0:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <current_step>
+			sleep_FLAG = 1;
+  f4:	81 e0       	ldi	r24, 0x01	; 1
+  f6:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+		break;
+	}
+}
+  fa:	8f 91       	pop	r24
+  fc:	0f 90       	pop	r0
+  fe:	0f be       	out	0x3f, r0	; 63
+ 100:	0f 90       	pop	r0
+ 102:	1f 90       	pop	r1
+ 104:	18 95       	reti
+
+00000106 <__vector_6>:
+
+ISR (TIM0_COMPA_vect) {
+ 106:	1f 92       	push	r1
+ 108:	0f 92       	push	r0
+ 10a:	0f b6       	in	r0, 0x3f	; 63
+ 10c:	0f 92       	push	r0
+ 10e:	11 24       	eor	r1, r1
+ 110:	8f 93       	push	r24
+	time_counter++;
+ 112:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <time_counter>
+ 116:	8f 5f       	subi	r24, 0xFF	; 255
+ 118:	80 93 63 00 	sts	0x0063, r24	; 0x800063 <time_counter>
+	if(time_counter > 15) {					// если слишком долго ничего не происходит, то видимо это конец передачи или ошибка, поэтому сбрасываем процедуру приёма данных 
+ 11c:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <time_counter>
+ 120:	80 31       	cpi	r24, 0x10	; 16
+ 122:	80 f0       	brcs	.+32     	; 0x144 <__vector_6+0x3e>
+		current_step = 0;
+ 124:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <current_step>
+		time_counter = 0;
+ 128:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <time_counter>
+		TCNT0 = 0;
+ 12c:	12 be       	out	0x32, r1	; 50
+		TIFR0 = (1<<OCF0A);
+ 12e:	84 e0       	ldi	r24, 0x04	; 4
+ 130:	88 bf       	out	0x38, r24	; 56
+		TIMSK0 &=(~(1<<OCIE0A));
+ 132:	89 b7       	in	r24, 0x39	; 57
+ 134:	8b 7f       	andi	r24, 0xFB	; 251
+ 136:	89 bf       	out	0x39, r24	; 57
+		
+		OUT_HIGH;
+ 138:	88 b3       	in	r24, 0x18	; 24
+ 13a:	84 60       	ori	r24, 0x04	; 4
+ 13c:	88 bb       	out	0x18, r24	; 24
+		sleep_FLAG = 1;
+ 13e:	81 e0       	ldi	r24, 0x01	; 1
+ 140:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+	}
+}
+ 144:	8f 91       	pop	r24
+ 146:	0f 90       	pop	r0
+ 148:	0f be       	out	0x3f, r0	; 63
+ 14a:	0f 90       	pop	r0
+ 14c:	1f 90       	pop	r1
+ 14e:	18 95       	reti
+
+00000150 <pin_setup>:
+void pin_setup () {
+	DDRB &=(~(1<<IN_PIN));
+ 150:	87 b3       	in	r24, 0x17	; 23
+ 152:	8d 7f       	andi	r24, 0xFD	; 253
+ 154:	87 bb       	out	0x17, r24	; 23
+	PORTB |=(1<<IN_PIN);
+ 156:	88 b3       	in	r24, 0x18	; 24
+ 158:	82 60       	ori	r24, 0x02	; 2
+ 15a:	88 bb       	out	0x18, r24	; 24
+	DDRB |=(1<<OUT_PIN);
+ 15c:	87 b3       	in	r24, 0x17	; 23
+ 15e:	84 60       	ori	r24, 0x04	; 4
+ 160:	87 bb       	out	0x17, r24	; 23
+	DDRB |=(1<<EN_PIN)|(1<<STEP_PIN)|(1<<DIR_PIN);
+ 162:	87 b3       	in	r24, 0x17	; 23
+ 164:	89 61       	ori	r24, 0x19	; 25
+ 166:	87 bb       	out	0x17, r24	; 23
+ 168:	08 95       	ret
+
+0000016a <delay_time_ms>:
+
+}
+
+void delay_time_ms (unsigned int delay) {
+	for(unsigned int i=0; i<delay; i++) {
+ 16a:	20 e0       	ldi	r18, 0x00	; 0
+ 16c:	30 e0       	ldi	r19, 0x00	; 0
+ 16e:	08 c0       	rjmp	.+16     	; 0x180 <delay_time_ms+0x16>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 170:	ef e5       	ldi	r30, 0x5F	; 95
+ 172:	f9 e0       	ldi	r31, 0x09	; 9
+ 174:	31 97       	sbiw	r30, 0x01	; 1
+ 176:	f1 f7       	brne	.-4      	; 0x174 <delay_time_ms+0xa>
+ 178:	00 c0       	rjmp	.+0      	; 0x17a <delay_time_ms+0x10>
+ 17a:	00 00       	nop
+ 17c:	2f 5f       	subi	r18, 0xFF	; 255
+ 17e:	3f 4f       	sbci	r19, 0xFF	; 255
+ 180:	28 17       	cp	r18, r24
+ 182:	39 07       	cpc	r19, r25
+ 184:	a8 f3       	brcs	.-22     	; 0x170 <delay_time_ms+0x6>
+		_delay_ms(1);
+	}
+}
+ 186:	08 95       	ret
+
+00000188 <INT0_interrupt_setup_awakening>:
+
+void INT0_interrupt_setup_awakening (void) {	// настройка прерывания для пробуждения
+	MCUCR = (0<<ISC00);							// настраиваем прерывание на INT0 чтобы проснуться на LOW_LEVEL
+ 188:	15 be       	out	0x35, r1	; 53
+	GIMSK = (1<<INT0);							// включаем прерывание INT0, чтобы проснуться
+ 18a:	80 e4       	ldi	r24, 0x40	; 64
+ 18c:	8b bf       	out	0x3b, r24	; 59
+	MCUCR = (1<<SM1)|(1<<SE);					// режим power-down
+ 18e:	80 e3       	ldi	r24, 0x30	; 48
+ 190:	85 bf       	out	0x35, r24	; 53
+ 192:	08 95       	ret
+
+00000194 <Timer0_setup>:
+}
+
+
+void Timer0_setup (void) {																// функция инициализации таймера 0 для контроля временных промежутков и генерирования прерываний
+	TCCR0A = (0<<COM0A1)|(0<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(1<<WGM01)|(0<<WGM00);		// режим CTC, пины отключены от таймера, верхний предел задаётся OCR
+ 194:	82 e0       	ldi	r24, 0x02	; 2
+ 196:	8f bd       	out	0x2f, r24	; 47
+	TCCR0B = (0<<CS00)|(0<<CS01)|(1<<CS02)|(0<<WGM02);									// предделитель 256
+ 198:	84 e0       	ldi	r24, 0x04	; 4
+ 19a:	83 bf       	out	0x33, r24	; 51
+	OCR0A = 32;																			// настраиваем таймер на 1КГц	
+ 19c:	80 e2       	ldi	r24, 0x20	; 32
+ 19e:	86 bf       	out	0x36, r24	; 54
+ 1a0:	08 95       	ret
+
+000001a2 <motor_step>:
+	//TIMSK0 |= (1<<OCIE0A);																// разрешение прерывания по совпадению
+}
+
+void motor_step (char direction, unsigned char step_value, unsigned int delay) {
+ 1a2:	0f 93       	push	r16
+ 1a4:	1f 93       	push	r17
+ 1a6:	cf 93       	push	r28
+ 1a8:	df 93       	push	r29
+ 1aa:	d6 2f       	mov	r29, r22
+ 1ac:	8a 01       	movw	r16, r20
+	unsigned char step_counter;
+	EN_ON;
+ 1ae:	98 b3       	in	r25, 0x18	; 24
+ 1b0:	91 60       	ori	r25, 0x01	; 1
+ 1b2:	98 bb       	out	0x18, r25	; 24
+	
+	if(direction == 'F') DIR_FORWARD;
+ 1b4:	86 34       	cpi	r24, 0x46	; 70
+ 1b6:	19 f4       	brne	.+6      	; 0x1be <motor_step+0x1c>
+ 1b8:	98 b3       	in	r25, 0x18	; 24
+ 1ba:	90 61       	ori	r25, 0x10	; 16
+ 1bc:	98 bb       	out	0x18, r25	; 24
+	if(direction == 'B') DIR_BACK;
+ 1be:	82 34       	cpi	r24, 0x42	; 66
+ 1c0:	19 f4       	brne	.+6      	; 0x1c8 <motor_step+0x26>
+ 1c2:	88 b3       	in	r24, 0x18	; 24
+ 1c4:	8f 7e       	andi	r24, 0xEF	; 239
+ 1c6:	88 bb       	out	0x18, r24	; 24
+	TCCR0B = (0<<CS00)|(0<<CS01)|(1<<CS02)|(0<<WGM02);									// предделитель 256
+	OCR0A = 32;																			// настраиваем таймер на 1КГц	
+	//TIMSK0 |= (1<<OCIE0A);																// разрешение прерывания по совпадению
+}
+
+void motor_step (char direction, unsigned char step_value, unsigned int delay) {
+ 1c8:	c0 e0       	ldi	r28, 0x00	; 0
+ 1ca:	0d c0       	rjmp	.+26     	; 0x1e6 <motor_step+0x44>
+	
+	if(direction == 'F') DIR_FORWARD;
+	if(direction == 'B') DIR_BACK;
+	
+	for(step_counter = 0; step_counter < step_value; step_counter ++) {
+		STEP_ON;
+ 1cc:	88 b3       	in	r24, 0x18	; 24
+ 1ce:	88 60       	ori	r24, 0x08	; 8
+ 1d0:	88 bb       	out	0x18, r24	; 24
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 1d2:	80 ef       	ldi	r24, 0xF0	; 240
+ 1d4:	90 e0       	ldi	r25, 0x00	; 0
+ 1d6:	01 97       	sbiw	r24, 0x01	; 1
+ 1d8:	f1 f7       	brne	.-4      	; 0x1d6 <motor_step+0x34>
+		_delay_us(100);
+		STEP_OFF;
+ 1da:	88 b3       	in	r24, 0x18	; 24
+ 1dc:	87 7f       	andi	r24, 0xF7	; 247
+ 1de:	88 bb       	out	0x18, r24	; 24
+		delay_time_ms(delay);
+ 1e0:	c8 01       	movw	r24, r16
+ 1e2:	c3 df       	rcall	.-122    	; 0x16a <delay_time_ms>
+	EN_ON;
+	
+	if(direction == 'F') DIR_FORWARD;
+	if(direction == 'B') DIR_BACK;
+	
+	for(step_counter = 0; step_counter < step_value; step_counter ++) {
+ 1e4:	cf 5f       	subi	r28, 0xFF	; 255
+ 1e6:	cd 17       	cp	r28, r29
+ 1e8:	88 f3       	brcs	.-30     	; 0x1cc <motor_step+0x2a>
+		_delay_us(100);
+		STEP_OFF;
+		delay_time_ms(delay);
+	}
+	
+	EN_OFF;
+ 1ea:	88 b3       	in	r24, 0x18	; 24
+ 1ec:	8e 7f       	andi	r24, 0xFE	; 254
+ 1ee:	88 bb       	out	0x18, r24	; 24
+
+}
+ 1f0:	df 91       	pop	r29
+ 1f2:	cf 91       	pop	r28
+ 1f4:	1f 91       	pop	r17
+ 1f6:	0f 91       	pop	r16
+ 1f8:	08 95       	ret
+
+000001fa <main>:
+
+int main(void) {
+	
+	pin_setup();
+ 1fa:	aa df       	rcall	.-172    	; 0x150 <pin_setup>
+	PORTB &=(~((1<<DIR_PIN)|(1<<STEP_PIN)));	// режим полного шага
+ 1fc:	88 b3       	in	r24, 0x18	; 24
+ 1fe:	87 7e       	andi	r24, 0xE7	; 231
+ 200:	88 bb       	out	0x18, r24	; 24
+	
+	while (!(PINB&(1<<IN_PIN))) { _delay_us(10); }	
+ 202:	03 c0       	rjmp	.+6      	; 0x20a <main+0x10>
+ 204:	80 e2       	ldi	r24, 0x20	; 32
+ 206:	8a 95       	dec	r24
+ 208:	f1 f7       	brne	.-4      	; 0x206 <main+0xc>
+ 20a:	b1 9b       	sbis	0x16, 1	; 22
+ 20c:	fb cf       	rjmp	.-10     	; 0x204 <main+0xa>
+
+	Timer0_setup();
+ 20e:	c2 df       	rcall	.-124    	; 0x194 <Timer0_setup>
+	
+	INT0_interrupt_setup_awakening();
+ 210:	bb df       	rcall	.-138    	; 0x188 <INT0_interrupt_setup_awakening>
+
+	sei();
+ 212:	78 94       	sei
+	
+	sleep_FLAG = 1;
+ 214:	81 e0       	ldi	r24, 0x01	; 1
+ 216:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+	    
+    while (1) {
+		if(current_step == 0) {
+ 21a:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <current_step>
+ 21e:	81 11       	cpse	r24, r1
+ 220:	fc cf       	rjmp	.-8      	; 0x21a <main+0x20>
+			if(sequinse_state != sequinse_state_previous) {
+ 222:	90 91 62 00 	lds	r25, 0x0062	; 0x800062 <sequinse_state>
+ 226:	80 91 61 00 	lds	r24, 0x0061	; 0x800061 <sequinse_state_previous>
+ 22a:	98 17       	cp	r25, r24
+ 22c:	99 f0       	breq	.+38     	; 0x254 <main+0x5a>
+				if(sequinse_state == 0) {
+ 22e:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <sequinse_state>
+ 232:	81 11       	cpse	r24, r1
+ 234:	06 c0       	rjmp	.+12     	; 0x242 <main+0x48>
+					motor_step('F',13,8);
+ 236:	48 e0       	ldi	r20, 0x08	; 8
+ 238:	50 e0       	ldi	r21, 0x00	; 0
+ 23a:	6d e0       	ldi	r22, 0x0D	; 13
+ 23c:	86 e4       	ldi	r24, 0x46	; 70
+ 23e:	b1 df       	rcall	.-158    	; 0x1a2 <motor_step>
+ 240:	05 c0       	rjmp	.+10     	; 0x24c <main+0x52>
+				}
+				else {
+					motor_step('B',13,8);
+ 242:	48 e0       	ldi	r20, 0x08	; 8
+ 244:	50 e0       	ldi	r21, 0x00	; 0
+ 246:	6d e0       	ldi	r22, 0x0D	; 13
+ 248:	82 e4       	ldi	r24, 0x42	; 66
+ 24a:	ab df       	rcall	.-170    	; 0x1a2 <motor_step>
+				}
+				sequinse_state_previous = sequinse_state;
+ 24c:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <sequinse_state>
+ 250:	80 93 61 00 	sts	0x0061, r24	; 0x800061 <sequinse_state_previous>
+			}
+			
+			if(sleep_FLAG == 1) {
+ 254:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+ 258:	81 30       	cpi	r24, 0x01	; 1
+ 25a:	f9 f6       	brne	.-66     	; 0x21a <main+0x20>
+				INT0_interrupt_setup_awakening();
+ 25c:	95 df       	rcall	.-214    	; 0x188 <INT0_interrupt_setup_awakening>
+				asm("sleep");
+ 25e:	88 95       	sleep
+ 260:	dc cf       	rjmp	.-72     	; 0x21a <main+0x20>
+
+00000262 <_exit>:
+ 262:	f8 94       	cli
+
+00000264 <__stop_program>:
+ 264:	ff cf       	rjmp	.-2      	; 0x264 <__stop_program>
