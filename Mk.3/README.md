@@ -1,1 +1,1 @@
-![Структура пайетки](https://github.com/ArtemMechanik/SmartSequins/blob/11374e6bbc981b4bdd032517a922525f36b38bc6/Mk.3/source/%D0%9F%D0%B0%D0%B9%D0%B5%D1%82%D0%BA%D0%B0%20%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0.jpg)
+![Структура пайетки](https://github.com/ArtemMechanik/SmartSequins/blob/b494957b09c79f648863e296d101df75ff4a141d/Mk.3/source/%D0%9C%D0%B0%D1%82%D1%80%D0%B8%D1%86%D0%B0%20%D0%BF%D0%B0%D0%B9%D0%B5%D1%82%D0%BE%D0%BA.jpg)
