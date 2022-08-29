@@ -24,39 +24,39 @@ ISR(TIMER1_OVF_vect) {
 
   // что-то там про обновление матрицы...
   // при каждом обновлении матрицы мы запускаем на выход посылку, содержащую команды для всех пайеток, по левую сторону от указателя
-  if(sequins.matrix.currentStep == 0) {
+  if(sequins.matrix.counters.currentStep == 0) {
       // процедуру запускаем только после того как завершилось предыдущее обносление и в главном цикле сбросили флаг завершения обновления матрицы
       if((sequins.FLAG.matrixUpdateStart == 1)&(sequins.FLAG.matrixUpdateComplite == 0)) {
         strobON;
         strobeTimeCounter = 1;
-        sequins.matrix.currentStep = 1;
-        sequins.matrix.delayCounter = 0;        
+        sequins.matrix.counters.currentStep = 1;
+        sequins.matrix.counters.delayCounter = 0;        
       }
       
   }
     
-  switch(sequins.matrix.currentStep) {
+  switch(sequins.matrix.counters.currentStep) {
     case 0: // передача не производится, линия прижата к земле
         dataOFF;
     break;
 
     case 1: // начинаем передачу, подтягиваем линию данных к + на 3 такта
         dataON;
-        if(sequins.matrix.delayCounter < 3) sequins.matrix.delayCounter++;
+        if(sequins.matrix.counters.delayCounter < 3) sequins.matrix.counters.delayCounter++;
         else {
-          sequins.matrix.delayCounter = 0;
-          sequins.matrix.sequinsCounter = 0;
-          sequins.matrix.bytePointer = 0;
-          sequins.matrix.bitPointer = 0;
-          sequins.matrix.currentStep = 2; // передача сообщения
+          sequins.matrix.counters.delayCounter = 0;
+          sequins.matrix.counters.sequinsCounter = 0;
+          sequins.matrix.counters.bytePointer = 0;
+          sequins.matrix.counters.bitPointer = 0;
+          sequins.matrix.counters.currentStep = 2; // передача сообщения
           dataOFF;
         }
     break;
 
     case 2: // передача основного сообщения, сообщение для каждой пайетки передаётся 3 такта (1 - всегда LOW, 3 - всегда HIGH, 2 - определяет состояние пайетки)
-        if(sequins.matrix.sequinsCounter < (sequins.counters.sequinsCounter+1)) // следим чему равен счётчик пайеток
+        if(sequins.matrix.counters.sequinsCounter < (sequins.counters.sequinsCounter+1)) // следим чему равен счётчик пайеток
         { 
-              if((sequins.state[sequins.matrix.bytePointer] & (1<<sequins.matrix.bitPointer)) != 0)   // читаем состояние пайетки
+              if((sequins.state[sequins.matrix.counters.bytePointer] & (1<<sequins.matrix.counters.bitPointer)) != 0)   // читаем состояние пайетки
               {
                 sequins.matrix.timeLow = 2;   // в завивисомти от состояния указываем длительность состояния LOW на линии и общую длительность сообщения для одной пайетки
                 sequins.matrix.timeTotal = 3;
@@ -67,39 +67,39 @@ ISR(TIMER1_OVF_vect) {
                 sequins.matrix.timeTotal = 3;
               }
               
-              sequins.matrix.delayCounter++; // счётчик времени для сообщения пайтки
-              if(sequins.matrix.delayCounter < sequins.matrix.timeLow)        dataOFF;
-              else if(sequins.matrix.delayCounter < sequins.matrix.timeTotal) dataON;
+              sequins.matrix.counters.delayCounter++; // счётчик времени для сообщения пайтки
+              if(sequins.matrix.counters.delayCounter < sequins.matrix.timeLow)        dataOFF;
+              else if(sequins.matrix.counters.delayCounter < sequins.matrix.timeTotal) dataON;
               else 
                                                                            {
                                                                               dataOFF;
-                                                                              sequins.matrix.delayCounter = 0;
-                                                                              sequins.matrix.bitPointer++;
+                                                                              sequins.matrix.counters.delayCounter = 0;
+                                                                              sequins.matrix.counters.bitPointer++;
                                                                                   
                                                                               // сдедим за указателями на массив
-                                                                              if(sequins.matrix.bitPointer > 7) {
-                                                                                  sequins.matrix.bitPointer = 0;
-                                                                                  sequins.matrix.bytePointer++;
+                                                                              if(sequins.matrix.counters.bitPointer > 7) {
+                                                                                  sequins.matrix.counters.bitPointer = 0;
+                                                                                  sequins.matrix.counters.bytePointer++;
                                                                               }
                                                                                   
-                                                                              sequins.matrix.sequinsCounter ++;
+                                                                              sequins.matrix.counters.sequinsCounter ++;
                                                                           }
               
 
         }
         else {
-          sequins.matrix.currentStep = 3;
-          sequins.matrix.delayCounter = 0;
+          sequins.matrix.counters.currentStep = 3;
+          sequins.matrix.counters.delayCounter = 0;
         }
           
     break;
 
     case 3:   // конец сообщения для матрицы обрамляется прижатой на 3 такта к земле линией данных
         dataOFF;  
-        if(sequins.matrix.delayCounter < 3) sequins.matrix.delayCounter++;
+        if(sequins.matrix.counters.delayCounter < 3) sequins.matrix.counters.delayCounter++;
         else {
-          sequins.matrix.delayCounter = 0;
-          sequins.matrix.currentStep = 0;
+          sequins.matrix.counters.delayCounter = 0;
+          sequins.matrix.counters.currentStep = 0;
           
           sequins.FLAG.matrixUpdateComplite = 1;  // флаг окончания обновления матрицы
         }

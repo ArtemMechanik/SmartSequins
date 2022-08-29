@@ -14,7 +14,7 @@
 #define strob1ON   strob1PORT |= (1<<strob1PIN)
 #define strob1OFF  strob1PORT &=(~(1<<strob1PIN))
 
-// пин данных
+// пин вывода данных
 #define dataPORT PORTD
 #define dataPIN  7
 #define dataON   dataPORT |= (1<<dataPIN)
@@ -22,22 +22,27 @@
 
 String dataResive;
 
+struct sequinsCounters {
+  uint8_t delayCounter = 0;
+  uint8_t currentStep = 0;  
+  uint8_t bytePointer = 0;
+  uint8_t bitPointer = 0;
+  uint8_t sequinsCounter = 0;
+};
+
 struct matrixUpdateVariables {
   uint8_t timeLow = 0;
   uint8_t timeTotal = 0;
-  uint8_t delayCounter = 0;
-  uint8_t currentStep = 0;
-  uint8_t bytePointer = 0;
-  uint8_t bitPointer = 0;
-  uint8_t sequinsCounter = 0;
   uint8_t updateStart = 0;
-  uint8_t pdateComplite = 1;
+  uint8_t updateComplite = 1;
+  
+  struct  sequinsCounters counters;
 };
 
-struct sequinsCounters {
-  uint8_t bytePointer = 0;
-  uint8_t bitPointer = 0;
-  uint8_t sequinsCounter = 0;
+
+
+struct sequinsSerial {
+  struct  sequinsCounters counters;
 };
 
 struct sequinsFLAGs {
@@ -54,9 +59,10 @@ struct sequinsMatrix {
   uint16_t timeParametr = 10;      // задержка между переключенями пайеток
   uint8_t state[10] = {0, };      // состояние пайеток (каждый бит - одна пайетка)
   uint8_t stateNew[10] = {0, };   // состояние пайеток, полученное по UART
-  struct sequinsCounters counters;
-  struct sequinsFLAGs FLAG;
+  struct sequinsCounters        counters;
+  struct sequinsFLAGs           FLAG;
   struct matrixUpdateVariables  matrix;
+  struct sequinsSerial          serial;
 } sequins;
 
 
@@ -107,6 +113,16 @@ void serialExecute (String request) {
           Serial.println("data:");
           return;
         }
+        if(request.equals("ChangeSequins")) {
+          Serial.println("OK");
+          
+          // вывоим состояние всех пайеток
+          //Serial.print("sequinsStateNew: ");
+          //printBIN(&sequins.stateNew[0],2);
+
+          sequins.FLAG.change = 1;
+          return;
+        }
   }
 
   // обработка команд с данными
@@ -118,47 +134,80 @@ void serialExecute (String request) {
         //Serial.println (valueStr);
         //Serial.println("comand: " + comand + "; value: " + valueStr);  // цифра, которую нужно будет обрабатывать
         
-        if(comand.equals("SetParametr")) {
-          sequins.timeParametr = valueStr.toInt();
-         // timeParametr = valueStr.toInt();
-          //Serial.print(timeParametr);
-          if(sequins.timeParametr == 10) ledON; else if(sequins.timeParametr == 13) ledOFF;
-          Serial.println("OK");
-          return;
+        if(comand.equals("SetParametr")) // установка параметра задержки
+        {
+                sequins.timeParametr = valueStr.toInt();
+                //Serial.print(timeParametr);
+                if(sequins.timeParametr == 10) ledON; else if(sequins.timeParametr == 13) ledOFF;
+                Serial.println("OK");
+                return;
         }
-        if(comand.equals("SetSequins")) {
-          // парсим состояния пайеток и помещаем в массив с состояними, которые необходимо установить
-          uint8_t stateLenght = valueStr.length();
-          sequins.quantity = stateLenght;           // запоминаем количество пайеток
-          uint8_t bitPointer = 0;
-          uint8_t bytePointer = 0;
-          for(uint8_t i = 0; i <= stateLenght; i++) {
-                char oneSimbol = valueStr.charAt(i);
-                if(oneSimbol == '1') {
-                      //Serial.print('1');
-                      sequins.stateNew[bytePointer] |=(1<<bitPointer);
+        
+        if(comand.equals("SetSequins"))  // начинаем обновлять лист состояний пайеток
+        {
+                // парсим состояния пайеток и помещаем в массив с состояними, которые необходимо установить
+                uint8_t stateLenght = valueStr.length();
+                sequins.quantity = stateLenght;           // запоминаем количество пайеток
+                sequins.serial.counters.bitPointer = 0;//uint8_t bitPointer = 0;
+                sequins.serial.counters.bytePointer = 0;//uint8_t bytePointer = 0;
+                for(uint8_t i = 0; i <= stateLenght; i++) 
+                {
+                        char oneSimbol = valueStr.charAt(i);
+                        if(oneSimbol == '1') {
+                              //Serial.print('1');
+                              sequins.stateNew[sequins.serial.counters.bytePointer] |=(1<<sequins.serial.counters.bitPointer);
+                        }
+                        else if(oneSimbol == '0') {
+                              //Serial.print('0');
+                              sequins.stateNew[sequins.serial.counters.bytePointer] &=(~(1<<sequins.serial.counters.bitPointer));
+                        }
+            
+                        // следим за указателями на массив
+                        sequins.serial.counters.bitPointer++;
+                        if(sequins.serial.counters.bitPointer > 7) {
+                          sequins.serial.counters.bitPointer = 0;
+                          sequins.serial.counters.bytePointer++;
+                        }
                 }
-                else if(oneSimbol == '0') {
-                      //Serial.print('0');
-                      sequins.stateNew[bytePointer] &=(~(1<<bitPointer));
-                }
-    
-                // следим за указателями на массив
-                bitPointer++;
-                if(bitPointer > 7) {
-                  bitPointer = 0;
-                  bytePointer++;
-                }
-          }
-          sequins.FLAG.change = 1;
-          Serial.println("OK");
-          
-          //Serial.print("sequinsStateNew: ");
-          //Serial.print(sequins.stateNew[0],BIN);
-          //Serial.print(";");
-          //Serial.println(sequins.stateNew[1],BIN);
-          return;
+                //sequins.FLAG.change = 1;
+                Serial.println("OK");
+                
+                //Serial.print("sequinsStateNew: ");
+                //Serial.print(sequins.stateNew[0],BIN);
+                //Serial.print(";");
+                //Serial.println(sequins.stateNew[1],BIN);
+                return;
         }
+
+        if(comand.equals("addSequins")) // продолжаем заполнять лист состояния пайеток
+        {
+                uint8_t stateLenght = valueStr.length();
+                sequins.quantity += stateLenght;
+                sequins.serial.counters.bitPointer--;
+                for(uint8_t i = 0; i <= stateLenght; i++) 
+                {
+                      char oneSimbol = valueStr.charAt(i);
+                      if(oneSimbol == '1') 
+                      {
+                            //Serial.print('1');
+                            sequins.stateNew[sequins.serial.counters.bytePointer] |=(1<<sequins.serial.counters.bitPointer);
+                      }
+                      else if(oneSimbol == '0') 
+                      {
+                            //Serial.print('0');
+                            sequins.stateNew[sequins.serial.counters.bytePointer] &=(~(1<<sequins.serial.counters.bitPointer));
+                      }
+                      // следим за указателями на массив
+                      sequins.serial.counters.bitPointer++;
+                      if(sequins.serial.counters.bitPointer > 7) 
+                      {
+                            sequins.serial.counters.bitPointer = 0;
+                            sequins.serial.counters.bytePointer++;
+                      }
+                }
+        }
+        Serial.println("OK");
+        return;
   }
 }
 
@@ -179,7 +228,7 @@ void sequinsExecute (struct sequinsMatrix *matrixLoc) {
   if(matrixLoc->counters.sequinsCounter == matrixLoc->quantity) {
         matrixLoc->FLAG.changeComplite = 1;
         matrixLoc->FLAG.change = 0;
-        Serial.println("sequinsIsSet");   
+        Serial.println("sequinsIsChange");   
         return; 
   }
   
@@ -232,6 +281,6 @@ void sequinsExecute (struct sequinsMatrix *matrixLoc) {
 void sequinsBreakChange (struct sequinsMatrix *matrixLoc) {
   matrixLoc->FLAG.change = 0;
   matrixLoc->FLAG.changeComplite = 1;
-  sequins.matrix.currentStep = 0;
+  sequins.matrix.counters.currentStep = 0;
   timeCounter = 0;
 }
