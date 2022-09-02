@@ -12,7 +12,7 @@ void sequinsStructReset (void) {
 	sequins.matrix.updateComplite = 1;
 }
 
-// ïğåğûâàíèÿ ïğîöåññà îáíîâëåíèÿ ìàòğèöû
+// Ğ¿Ñ€ĞµÑ€Ñ‹Ğ²Ğ°Ğ½Ğ¸Ğµ Ğ¿Ñ€Ğ¾Ñ†ĞµÑÑĞ° Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ñ Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†Ñ‹
 void sequinsBreakChange (struct sequinsMatrix *matrixLoc) {
   matrixLoc->FLAG.change = 0;
   matrixLoc->FLAG.changeComplite = 1;
@@ -21,18 +21,18 @@ void sequinsBreakChange (struct sequinsMatrix *matrixLoc) {
 }
 
 void sequinsExecute (struct sequinsMatrix *matrixLoc) {
-  if(matrixLoc->FLAG.change  == 0) return; // åñëè íè÷åãî íå èçìåíèëîñü, òî è íå äåëàåì íè÷åãî
+  if(matrixLoc->FLAG.change  == 0) return; // ĞµÑĞ»Ğ¸ Ğ½Ğ¸Ñ‡ĞµĞ³Ğ¾ Ğ½Ğµ Ğ¸Ğ·Ğ¼ĞµĞ½Ğ¸Ğ»Ğ¾ÑÑŒ, Ñ‚Ğ¾ Ğ¸ Ğ½Ğµ Ğ´ĞµĞ»Ğ°ĞµĞ¼ Ğ½Ğ¸Ñ‡ĞµĞ³Ğ¾
   if(matrixLoc->FLAG.changeComplite == 1) {
       matrixLoc->FLAG.changeComplite = 0;
       
-      // îáíóëÿåì îñíîâíûå ıëåìåíòû, îòâå÷àşùèå çà ïåğåáîğ ìàññèâà ñîñòîÿíèé ïàéåòîê
+      // Ğ¾Ğ±Ğ½ÑƒĞ»ÑĞµĞ¼ Ğ¾ÑĞ½Ğ¾Ğ²Ğ½Ñ‹Ğµ ÑĞ»ĞµĞ¼ĞµĞ½Ñ‚Ñ‹, Ğ¾Ñ‚Ğ²ĞµÑ‡Ğ°ÑÑ‰Ğ¸Ğµ Ğ·Ğ° Ğ¿ĞµÑ€ĞµĞ±Ğ¾Ñ€ Ğ¼Ğ°ÑÑĞ¸Ğ²Ğ° ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğ¹ Ğ¿Ğ°Ğ¹ĞµÑ‚Ğ¾Ğº
       matrixLoc->counters.bitPointer = 0;
       matrixLoc->counters.bytePointer = 0;
       matrixLoc->counters.sequinsCounter = 0;
     return;
   }
 
-  // åñëè îáíîâèëè ïîñëåäíşş ïàéåòêó, òî ïóòü çàâåğø¸í, ğàïîğòóåì îá óñïåøíîé ñìåíå öâåòà âñåé ìàòğèöåé
+  // ĞµÑĞ»Ğ¸ Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ¸Ğ»Ğ¸ Ğ¿Ğ¾ÑĞ»ĞµĞ´Ğ½ÑÑ Ğ¿Ğ°Ğ¹ĞµÑ‚ĞºÑƒ, Ñ‚Ğ¾ Ğ¿ÑƒÑ‚ÑŒ Ğ·Ğ°Ğ²ĞµÑ€ÑˆÑ‘Ğ½, Ñ€Ğ°Ğ¿Ğ¾Ñ€Ñ‚ÑƒĞµĞ¼ Ğ¾Ğ± ÑƒÑĞ¿ĞµÑˆĞ½Ğ¾Ğ¹ ÑĞ¼ĞµĞ½Ğµ Ñ†Ğ²ĞµÑ‚Ğ° Ğ²ÑĞµĞ¹ Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†ĞµĞ¹
   if(matrixLoc->counters.sequinsCounter == matrixLoc->quantity) {
         matrixLoc->FLAG.changeComplite = 1;
         matrixLoc->FLAG.change = 0;
@@ -40,14 +40,14 @@ void sequinsExecute (struct sequinsMatrix *matrixLoc) {
         return; 
   }
   
-  if(timeCounterOverflowFLAG == 0) return; // åñëè òàéìåğ çàïóùåí, à ôëàãà ïåğåïîëíåíèÿ åù¸ íåò, çíà÷èò çàäåğæêà åù¸ íå îòğàáîòàíà, æä¸ì äàëüøå...
+  if(timeCounterOverflowFLAG == 0) return; // ĞµÑĞ»Ğ¸ Ñ‚Ğ°Ğ¹Ğ¼ĞµÑ€ Ğ·Ğ°Ğ¿ÑƒÑ‰ĞµĞ½, Ğ° Ñ„Ğ»Ğ°Ğ³Ğ° Ğ¿ĞµÑ€ĞµĞ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ñ ĞµÑ‰Ñ‘ Ğ½ĞµÑ‚, Ğ·Ğ½Ğ°Ñ‡Ğ¸Ñ‚ Ğ·Ğ°Ğ´ĞµÑ€Ğ¶ĞºĞ° ĞµÑ‰Ñ‘ Ğ½Ğµ Ğ¾Ñ‚Ñ€Ğ°Ğ±Ğ¾Ñ‚Ğ°Ğ½Ğ°, Ğ¶Ğ´Ñ‘Ğ¼ Ğ´Ğ°Ğ»ÑŒÑˆĞµ...
 
-  // êàê òîëüêî çàâåğøèëè îáíîâëåíèå ìàòğèöû, îòğàáàòûâàåì çàäåğæêó ìåæäó ïàéåòêàìè
-  // çàäåğæêà îòğàáàòûâàåòñÿ òîëüêî ïåğåäà÷å âñåãî ñîîáùåíèÿ â ìàòğèöó
-  // ò.å. ÷åğåç N*3ìÑ + 6ìÑ,
-  // ãäå N - êîëè÷åñòâî ïàéåòîê â ñîîáùåíèè, 3ìÑ - âğåìÿ ïåğåäà÷è ïàêåòà îäíîé ïàéåòêå, 6ìÑ - ñîñòîÿíèÿ ëèíèè â íà÷àëå è êîíöå ïîñûëêè
+  // ĞºĞ°Ğº Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ Ğ·Ğ°Ğ²ĞµÑ€ÑˆĞ¸Ğ»Ğ¸ Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ğµ Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†Ñ‹, Ğ¾Ñ‚Ñ€Ğ°Ğ±Ğ°Ñ‚Ñ‹Ğ²Ğ°ĞµĞ¼ Ğ·Ğ°Ğ´ĞµÑ€Ğ¶ĞºÑƒ Ğ¼ĞµĞ¶Ğ´Ñƒ Ğ¿Ğ°Ğ¹ĞµÑ‚ĞºĞ°Ğ¼Ğ¸
+  // Ğ·Ğ°Ğ´ĞµÑ€Ğ¶ĞºĞ° Ğ¾Ñ‚Ñ€Ğ°Ğ±Ğ°Ñ‚Ñ‹Ğ²Ğ°ĞµÑ‚ÑÑ Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ Ğ¿ĞµÑ€ĞµĞ´Ğ°Ñ‡Ğµ Ğ²ÑĞµĞ³Ğ¾ ÑĞ¾Ğ¾Ğ±Ñ‰ĞµĞ½Ğ¸Ñ Ğ² Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†Ñƒ
+  // Ñ‚.Ğµ. Ñ‡ĞµÑ€ĞµĞ· N*3Ğ¼Ğ¡ + 6Ğ¼Ğ¡,
+  // Ğ³Ğ´Ğµ N - ĞºĞ¾Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ğ¿Ğ°Ğ¹ĞµÑ‚Ğ¾Ğº Ğ² ÑĞ¾Ğ¾Ğ±Ñ‰ĞµĞ½Ğ¸Ğ¸, 3Ğ¼Ğ¡ - Ğ²Ñ€ĞµĞ¼Ñ Ğ¿ĞµÑ€ĞµĞ´Ğ°Ñ‡Ğ¸ Ğ¿Ğ°ĞºĞµÑ‚Ğ° Ğ¾Ğ´Ğ½Ğ¾Ğ¹ Ğ¿Ğ°Ğ¹ĞµÑ‚ĞºĞµ, 6Ğ¼Ğ¡ - ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ñ Ğ»Ğ¸Ğ½Ğ¸Ğ¸ Ğ² Ğ½Ğ°Ñ‡Ğ°Ğ»Ğµ Ğ¸ ĞºĞ¾Ğ½Ñ†Ğµ Ğ¿Ğ¾ÑÑ‹Ğ»ĞºĞ¸
   if(matrixLoc->FLAG.matrixUpdateComplite == 1) {      
-    timeCounter = matrixLoc->timeParametr; // çàïóñêàåì òàéìåğ
+    timeCounter = matrixLoc->timeParametr; // Ğ·Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ Ñ‚Ğ°Ğ¹Ğ¼ĞµÑ€
 		
 		//if(matrixLoc->timeParametr == 11) MDR_PORTA->RXTX |=(PORT_Pin_7); else if(matrixLoc->timeParametr == 13) MDR_PORTA->RXTX &=(~(PORT_Pin_7));
     timeCounterOverflowFLAG = 0;
@@ -57,26 +57,26 @@ void sequinsExecute (struct sequinsMatrix *matrixLoc) {
     return; 
   }
 
-  if(matrixLoc->FLAG.matrixUpdateStart == 1) return;  // åñëè ïğîèçâîäèòñÿ îáíîâëåíèå ìàòğèöû, ïğîïóñêàåì ñëåäóşùèå øàãè, ôëàã ñáğàñûâàåòñÿ ãäå-òî â äğóãîì ìåñòå
+  if(matrixLoc->FLAG.matrixUpdateStart == 1) return;  //ĞµÑĞ»Ğ¸ Ğ¿Ñ€Ğ¾Ğ¸Ğ·Ğ²Ğ¾Ğ´Ğ¸Ñ‚ÑÑ Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ğµ Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†Ñ‹, Ğ¿Ñ€Ğ¾Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ ÑĞ»ĞµĞ´ÑƒÑÑ‰Ğ¸Ğµ ÑˆĞ°Ğ³Ğ¸, Ñ„Ğ»Ğ°Ğ³ ÑĞ±Ñ€Ğ°ÑÑ‹Ğ²Ğ°ĞµÑ‚ÑÑ Ğ³Ğ´Ğµ-Ñ‚Ğ¾ Ğ² Ğ´Ñ€ÑƒĞ³Ğ¾Ğ¼ Ğ¼ĞµÑÑ‚Ğµ
   
-  // èùåì îòëè÷èÿ â òåêóùåì ñîñòîÿíèè ïàéåòîê è òîì, êîòîğîå íóæíî óñòíîâèòü
+  // Ğ¸Ñ‰ĞµĞ¼ Ğ¾Ñ‚Ğ»Ğ¸Ñ‡Ğ¸Ñ Ğ² Ñ‚ĞµĞºÑƒÑ‰ĞµĞ¼ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğ¸ Ğ¿Ğ°Ğ¹ĞµÑ‚Ğ¾Ğº Ğ¸ Ñ‚Ğ¾Ğ¼, ĞºĞ¾Ñ‚Ğ¾Ñ€Ğ¾Ğµ Ğ½ÑƒĞ¶Ğ½Ğ¾ ÑƒÑÑ‚Ğ½Ğ¾Ğ²Ğ¸Ñ‚ÑŒ
   while(matrixLoc->counters.sequinsCounter < matrixLoc->quantity) {
-        // ïğîâåğÿåì îòëè÷àşòñÿ ëè ñîñòîÿíèÿ ïàéåòîê â íîâîì è ñòàğîì ìàññèâå
+        // Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ÑĞµĞ¼ Ğ¾Ñ‚Ğ»Ğ¸Ñ‡Ğ°ÑÑ‚ÑÑ Ğ»Ğ¸ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ñ Ğ¿Ğ°Ğ¹ĞµÑ‚Ğ¾Ğº Ğ² Ğ½Ğ¾Ğ²Ğ¾Ğ¼ Ğ¸ ÑÑ‚Ğ°Ñ€Ğ¾Ğ¼ Ğ¼Ğ°ÑÑĞ¸Ğ²Ğµ
         if((matrixLoc->stateNew[matrixLoc->counters.bytePointer] & (1<<matrixLoc->counters.bitPointer)) != (matrixLoc->state[matrixLoc->counters.bytePointer] & (1<<matrixLoc->counters.bitPointer)))
         {
-             // åñëè äà, òî äà¸ì êîìàíäó íà ñìåíó öâåòà îäíîé ïàéåòêè
-             matrixLoc->FLAG.matrixUpdateStart = 1; // óñòàíàâëèâàåì ôëàã îáíîâëåíèÿ ìàòğèöû
+             // ĞµÑĞ»Ğ¸ Ğ´Ğ°, Ñ‚Ğ¾ Ğ´Ğ°Ñ‘Ğ¼ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñƒ Ğ½Ğ° ÑĞ¼ĞµĞ½Ñƒ Ñ†Ğ²ĞµÑ‚Ğ° Ğ¾Ğ´Ğ½Ğ¾Ğ¹ Ğ¿Ğ°Ğ¹ĞµÑ‚ĞºĞ¸
+             matrixLoc->FLAG.matrixUpdateStart = 1; // ÑƒÑÑ‚Ğ°Ğ½Ğ°Ğ²Ğ»Ğ¸Ğ²Ğ°ĞµĞ¼ Ñ„Ğ»Ğ°Ğ³ Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ñ Ğ¼Ğ°Ñ‚Ñ€Ğ¸Ñ†Ñ‹
              matrixLoc->FLAG.matrixUpdateComplite = 0;
 
-             // à òàêæå ñîõğàíÿåì èçìåíåíèÿ â ìàññèâå
+             // Ğ° Ñ‚Ğ°ĞºĞ¶Ğµ ÑĞ¾Ñ…Ñ€Ğ°Ğ½ÑĞµĞ¼ Ğ¸Ğ·Ğ¼ĞµĞ½ĞµĞ½Ğ¸Ñ Ğ² Ğ¼Ğ°ÑÑĞ¸Ğ²Ğµ
              if((matrixLoc->stateNew[matrixLoc->counters.bytePointer] & (1<<matrixLoc->counters.bitPointer)) == 0)
                 matrixLoc->state[matrixLoc->counters.bytePointer] &= (~(1<<matrixLoc->counters.bitPointer));
              else
                 matrixLoc->state[matrixLoc->counters.bytePointer] |= (1<<matrixLoc->counters.bitPointer);
-             return; // âûõîäèì èç öèêëà, ÷òîáû îòğàáîòàòü çàäåğæêó
+             return; // Ğ²Ñ‹Ñ…Ğ¾Ğ´Ğ¸Ğ¼ Ğ¸Ğ· Ñ†Ğ¸ĞºĞ»Ğ°, Ñ‡Ñ‚Ğ¾Ğ±Ñ‹ Ğ¾Ñ‚Ñ€Ğ°Ğ±Ğ¾Ñ‚Ğ°Ñ‚ÑŒ Ğ·Ğ°Ğ´ĞµÑ€Ğ¶ĞºÑƒ
         }
         
-        // ñëåäèì çà óêàçàòåëÿìè íà ìàññèâ
+        // ÑĞ»ĞµĞ´Ğ¸Ğ¼ Ğ·Ğ° ÑƒĞºĞ°Ğ·Ğ°Ñ‚ĞµĞ»ÑĞ¼Ğ¸ Ğ½Ğ° Ğ¼Ğ°ÑÑĞ¸Ğ²
         matrixLoc->counters.bitPointer++;
         if(matrixLoc->counters.bitPointer > 7) {
               matrixLoc->counters.bitPointer = 0;
