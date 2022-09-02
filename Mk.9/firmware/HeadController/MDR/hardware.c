@@ -5,15 +5,15 @@ struct debugVariable	debug;
 struct UARTparam_t		uart2;
 
 void pinSetup (void) {
-	RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTA, ENABLE); // тактирование порта
+	RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTA, ENABLE); // // С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЂС‚Р°
 	
-	// стробирующий пин для отладки системного таймера (PA7)
-	MDR_PORTA->OE |= (PORT_Pin_7);																			// настраиваем на выход
-	MDR_PORTA->ANALOG |=(PORT_Pin_7);																		// цифровой пин
-	MDR_PORTA->PWR |= PORT_PWR7_Msk;	      														// скоростной режим (с короткими фронтами)
-	MDR_PORTA->RXTX &=(~(PORT_Pin_7));																	// начальное значение
+	// СЃС‚СЂРѕР±РёСЂСѓСЋС‰РёР№ РїРёРЅ РґР»СЏ РѕС‚Р»Р°РґРєРё СЃРёСЃС‚РµРјРЅРѕРіРѕ С‚Р°Р№РјРµСЂР° (PA7)
+	MDR_PORTA->OE |= (PORT_Pin_7);		// РЅР°СЃС‚СЂР°РёРІР°РµРј РЅР° РІС‹С…РѕРґ
+	MDR_PORTA->ANALOG |=(PORT_Pin_7);	// С†РёС„СЂРѕРІРѕР№ РїРёРЅ
+	MDR_PORTA->PWR |= PORT_PWR7_Msk;	// СЃРєРѕСЂРѕСЃС‚РЅРѕР№ СЂРµР¶РёРј (СЃ РєРѕСЂРѕС‚РєРёРјРё С„СЂРѕРЅС‚Р°РјРё)
+	MDR_PORTA->RXTX &=(~(PORT_Pin_7));	// РЅР°С‡Р°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
 	
-	// стробирующий пин для отладки UART2 (PA6)
+	// СЃС‚СЂРѕР±РёСЂСѓСЋС‰РёР№ РїРёРЅ РґР»СЏ РѕС‚Р»Р°РґРєРё UART2 (PA6)
 	MDR_PORTA->OE |= (PORT_Pin_6);																			
 	MDR_PORTA->ANALOG |=(PORT_Pin_6);																		
 	MDR_PORTA->PWR |= PORT_PWR6_Msk;	      
@@ -21,66 +21,66 @@ void pinSetup (void) {
 }
 
 void sysTickSetup (void) {
-	// системный таймер генерирует прерывание каждую миллисекунду
-	SysTick->LOAD = (8000000/1000)+200; // 200 - поправка на частоту тактового генератора
+	// СЃРёСЃС‚РµРјРЅС‹Р№ С‚Р°Р№РјРµСЂ РіРµРЅРµСЂРёСЂСѓРµС‚ РїСЂРµСЂС‹РІР°РЅРёРµ РєР°Р¶РґСѓСЋ РјРёР»Р»РёСЃРµРєСѓРЅРґСѓ
+	SysTick->LOAD = (8000000/1000)+200; // 200 - РїРѕРїСЂР°РІРєР° РЅР° С‡Р°СЃС‚РѕС‚Сѓ С‚Р°РєС‚РѕРІРѕРіРѕ РіРµРЅРµСЂР°С‚РѕСЂР°
 	SysTick->CTRL |=(1<<SysTick_CTRL_CLKSOURCE_Pos)|(1<<SysTick_CTRL_TICKINT_Pos)|(1<<SysTick_CTRL_ENABLE_Pos);
 }
 
-// инициализация аппаратного UART2 и его пинов
+// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р°РїРїР°СЂР°С‚РЅРѕРіРѕ UART2 Рё РµРіРѕ РїРёРЅРѕРІ
 void UART2_Setup (unsigned int uartBaudRate) {
 	UART_InitTypeDef UARTInitStruct;
 	
-	// настраиваем пины для работы с UART2
+	// РЅР°СЃС‚СЂР°РёРІР°РµРј РїРёРЅС‹ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ UART2
 	// PF0 - RX, PF1 - TX
-	RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTF, ENABLE); // тактирование порта F включено
+	RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTF, ENABLE); // С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЂС‚Р° F РІРєР»СЋС‡РµРЅРѕ
 	
-  // настраиваем TX
-	MDR_PORTF->OE |= (PORT_Pin_1);			 		// настраиваем на выход
-	MDR_PORTF->ANALOG |=(PORT_Pin_1);		 		// цифровой пин
-	MDR_PORTF->PWR |= PORT_PWR1_Msk;	   		// скоростной режим (с короткими фронтами)
-  MDR_PORTF->FUNC |= PORT_FUNC_MODE1_Msk; // переопределённая функция для пина
+	// TX
+	MDR_PORTF->OE |= (PORT_Pin_1);			 		
+	MDR_PORTF->ANALOG |=(PORT_Pin_1);		 		
+	MDR_PORTF->PWR |= PORT_PWR1_Msk;	   		
+  	MDR_PORTF->FUNC |= PORT_FUNC_MODE1_Msk; 
 	
-	// настраиваем RX
-	MDR_PORTF->OE &=(~(PORT_Pin_0));			 	// настраиваем на вход
+	// RX
+	MDR_PORTF->OE &=(~(PORT_Pin_0));			 	
 	MDR_PORTF->ANALOG |=(PORT_Pin_0);		 		
 	MDR_PORTF->PWR |= PORT_PWR0_Msk;	   		
 	MDR_PORTF->FUNC |= PORT_FUNC_MODE0_Msk;
 	
-	// тактирование UART2
+	// С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ UART2
 	RST_CLK_PCLKcmd(RST_CLK_PCLK_UART2, ENABLE);
 	
-	UARTInitStruct.UART_BaudRate = 						uartBaudRate; 											// Скорость передачи данных
-  UARTInitStruct.UART_WordLength = 					UART_WordLength8b; 									// Количество битов данных в сообщении
-  UARTInitStruct.UART_StopBits = 						UART_StopBits1; 										// Количество STOP-битов
-  UARTInitStruct.UART_Parity = 							UART_Parity_No; 										// Контроль четности
-  UARTInitStruct.UART_FIFOMode = 						UART_FIFO_OFF; 											// Включение/отключение буфера
-  UARTInitStruct.UART_HardwareFlowControl = UART_HardwareFlowControl_RXE 				// Аппаратный контроль за передачей и приемом данных
+	UARTInitStruct.UART_BaudRate = 						uartBaudRate; 		// РЎРєРѕСЂРѕСЃС‚СЊ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С…
+  	UARTInitStruct.UART_WordLength = 					UART_WordLength8b; 	// РљРѕР»РёС‡РµСЃС‚РІРѕ Р±РёС‚РѕРІ РґР°РЅРЅС‹С… РІ СЃРѕРѕР±С‰РµРЅРёРё
+  	UARTInitStruct.UART_StopBits = 						UART_StopBits1; 	// РљРѕР»РёС‡РµСЃС‚РІРѕ STOP-Р±РёС‚РѕРІ
+  	UARTInitStruct.UART_Parity = 						UART_Parity_No; 	// РљРѕРЅС‚СЂРѕР»СЊ С‡РµС‚РЅРѕСЃС‚Рё
+  	UARTInitStruct.UART_FIFOMode = 						UART_FIFO_OFF; 		// Р’РєР»СЋС‡РµРЅРёРµ/РѕС‚РєР»СЋС‡РµРЅРёРµ Р±СѓС„РµСЂР°
+  	UARTInitStruct.UART_HardwareFlowControl = UART_HardwareFlowControl_RXE 				// РђРїРїР°СЂР°С‚РЅС‹Р№ РєРѕРЅС‚СЂРѕР»СЊ Р·Р° РїРµСЂРµРґР°С‡РµР№ Рё РїСЂРёРµРјРѕРј РґР°РЅРЅС‹С…
                                              | UART_HardwareFlowControl_TXE;																 
-	// Инициализация модуля UART
+	//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРѕРґСѓР»СЏ UART
   UART_Init (MDR_UART2, &UARTInitStruct);
 
-  // Выбор предделителя тактовой частоты модуля UART
+  // Р’С‹Р±РѕСЂ РїСЂРµРґРґРµР»РёС‚РµР»СЏ С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ РјРѕРґСѓР»СЏ UART
   UART_BRGInit (MDR_UART2, UART_HCLKdiv1);
 
-  // Выбор источников прерываний (прием и передача данных)
-  UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);		// приём данных
-	UART_ITConfig (MDR_UART2, UART_IT_TX, ENABLE);	// передача данных
-	UART_ITConfig (MDR_UART2, UART_IT_OE, ENABLE);		// переполнение буфера
+  // Р’С‹Р±РѕСЂ РёСЃС‚РѕС‡РЅРёРєРѕРІ РїСЂРµСЂС‹РІР°РЅРёР№ (РїСЂРёРµРј Рё РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С…)
+  UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);		// РїСЂРёС‘Рј РґР°РЅРЅС‹С…
+	UART_ITConfig (MDR_UART2, UART_IT_TX, ENABLE);	// РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С…
+	UART_ITConfig (MDR_UART2, UART_IT_OE, ENABLE);		// РїРµСЂРµРїРѕР»РЅРµРЅРёРµ Р±СѓС„РµСЂР°
 
-  // Разрешение работы модуля UART
+  // Р Р°Р·СЂРµС€РµРЅРёРµ СЂР°Р±РѕС‚С‹ РјРѕРґСѓР»СЏ UART
   UART_Cmd (MDR_UART2, ENABLE);
 }
 
-// обработчик прерывания UART2
+// РѕР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёСЏ UART2
 void UART2_IRQHandler (void) {
 	uint16_t receivedData;
 	char receivedByte;
   
-  if (UART_GetITStatusMasked (MDR_UART2, UART_IT_RX) == SET)	// по приёму байта
+  if (UART_GetITStatusMasked (MDR_UART2, UART_IT_RX) == SET)	// РїРѕ РїСЂРёС‘РјСѓ Р±Р°Р№С‚Р°
   {
-    UART_ClearITPendingBit (MDR_UART2, UART_IT_RX);	// очищаем флаг прерываний
+    UART_ClearITPendingBit (MDR_UART2, UART_IT_RX);	// РѕС‡РёС‰Р°РµРј С„Р»Р°Рі РїСЂРµСЂС‹РІР°РЅРёР№
 
-    // всегда необходимо читать регистр, иначе при повторном приёме байта не генерируется прерывание
+    // РІСЃРµРіРґР° РЅРµРѕР±С…РѕРґРёРјРѕ С‡РёС‚Р°С‚СЊ СЂРµРіРёСЃС‚СЂ, РёРЅР°С‡Рµ РїСЂРё РїРѕРІС‚РѕСЂРЅРѕРј РїСЂРёС‘РјРµ Р±Р°Р№С‚Р° РЅРµ РіРµРЅРµСЂРёСЂСѓРµС‚СЃСЏ РїСЂРµСЂС‹РІР°РЅРёРµ
 		receivedData = (uint16_t)(MDR_UART2->DR);	
 		receivedByte = (uint8_t)receivedData;
 		
@@ -96,14 +96,14 @@ void UART2_IRQHandler (void) {
 		}
 	}
 	
-	if(UART_GetITStatusMasked(MDR_UART2,UART_IT_TX) == SET) 	// по отправке байта
+	if(UART_GetITStatusMasked(MDR_UART2,UART_IT_TX) == SET) 	// РїРѕ РѕС‚РїСЂР°РІРєРµ Р±Р°Р№С‚Р°
 	{
 		UART_ClearITPendingBit (MDR_UART2, UART_IT_TX);	
 		
-		// грузим следующий байт
+		// РіСЂСѓР·РёРј СЃР»РµРґСѓСЋС‰РёР№ Р±Р°Р№С‚
 		if(uart2.dataPointerTx < uart2.dataTxCounter) 
 			MDR_UART2->DR = uart2.dataTx[uart2.dataPointerTx];
-		else // если следующий байт уже конец сообщения, то устанавливаем флаг окончания передачи сообщения
+		else // РµСЃР»Рё СЃР»РµРґСѓСЋС‰РёР№ Р±Р°Р№С‚ СѓР¶Рµ РєРѕРЅРµС† СЃРѕРѕР±С‰РµРЅРёСЏ, С‚Рѕ СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі РѕРєРѕРЅС‡Р°РЅРёСЏ РїРµСЂРµРґР°С‡Рё СЃРѕРѕР±С‰РµРЅРёСЏ
 		{
 			uart2.dataTxCompliteFLAG = 1;
 			uart2.dataTxCounter = 0;
@@ -113,21 +113,21 @@ void UART2_IRQHandler (void) {
 
 	}
 	
-	if (UART_GetITStatusMasked(MDR_UART2, UART_IT_OE) == SET) // по переполнению буфера
+	if (UART_GetITStatusMasked(MDR_UART2, UART_IT_OE) == SET) // РїРѕ РїРµСЂРµРїРѕР»РЅРµРЅРёСЋ Р±СѓС„РµСЂР°
 	{
 		UART_ClearITPendingBit (MDR_UART2, UART_IT_OE);
 		
 	}
 }
 
-// функции для передачи данных
+//  С„СѓРЅРєС†РёРё РґР»СЏ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С…
 
 void UART2_startTransmitIRQ (void) {
-	if(uart2.dataTxCompliteFLAG == 0) return;	// если передача уже начата, то продолжаем её
+	if(uart2.dataTxCompliteFLAG == 0) return;	// РµСЃР»Рё РїРµСЂРµРґР°С‡Р° СѓР¶Рµ РЅР°С‡Р°С‚Р°, С‚Рѕ РїСЂРѕРґРѕР»Р¶Р°РµРј РµС‘
 	uart2.dataPointerTx = 1;
 	uart2.dataTxCompliteFLAG = 0;
 	while((MDR_UART2->FR & (UART_FR_TXFF)) != 0) __NOP(); 
-	MDR_UART2->DR = uart2.dataTx[0];	// первый байт кладём вручную
+	MDR_UART2->DR = uart2.dataTx[0];	// РїРµСЂРІС‹Р№ Р±Р°Р№С‚ РєР»Р°РґС‘Рј РІСЂСѓС‡РЅСѓСЋ
 }
 
 void UART2_write (uint8_t *buff, uint8_t buffLenght) {
@@ -149,7 +149,7 @@ void UART2_print(uint8_t *buff) {
 	UART2_startTransmitIRQ();
 }
 
-// вывод чисел
+// РІС‹РІРѕРґ С‡РёСЃРµР»
 
 void UART2_printInt (int32_t data) {
 	unsigned char lowNumber;	
@@ -199,7 +199,7 @@ void UART2_printBin (uint8_t *buff, uint8_t buffLenght) {
   UART2_print("\r\n");
 }
 
-// функции для приёма данных
+// С„СѓРЅРєС†РёРё РґР»СЏ РїСЂРёС‘РјР° РґР°РЅРЅС‹С…
 
 void UART2_readUntil(char simbol) {
 	uart2.simbol = simbol;
