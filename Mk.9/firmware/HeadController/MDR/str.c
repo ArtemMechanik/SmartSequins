@@ -1,7 +1,7 @@
 
 #include "str.h"
 
-// функции для работы с массивами
+// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РјР°СЃСЃРёРІР°РјРё
 
 uint8_t strEquals (uint8_t *buff1, uint8_t *buff2, uint8_t start, uint8_t lenght) {
 	uint8_t i;
@@ -45,13 +45,13 @@ void strTrim (uint8_t *buff, uint8_t lenght) {
 	}
 }
 
-// возвращает символ из буфера по указанному адресу
+// РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРёРјРІРѕР» РёР· Р±СѓС„РµСЂР° РїРѕ СѓРєР°Р·Р°РЅРЅРѕРјСѓ Р°РґСЂРµСЃСѓ
 char strCharAt (uint8_t *buff, uint8_t symbolNumber) {
 	buff += symbolNumber;
 	return *buff;
 }
 
-// преобразование строки в число
+// РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РІ С‡РёСЃР»Рѕ
 int32_t srtToInt (uint8_t *buff) {
 	int8_t signMultiplier = 1;
 	int32_t value = 0;
