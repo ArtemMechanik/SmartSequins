@@ -8,7 +8,7 @@
 #define dataOFF  MDR_PORTA->RXTX &=(~(PORT_Pin_6))
 
 
-// прототипы функций 
+// РїСЂРѕС‚РѕС‚РёРїС‹ С„СѓРЅРєС†РёР№ 
  void Delay(int waitTicks);
  void Delay_ms (uint32_t DelayValue);
  void resetVariables (void);
@@ -19,7 +19,7 @@
  extern struct sequinsMatrix 	sequins; 
  
  
- // системное время
+ // СЃРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ
 extern uint16_t timeCounter;
 extern uint8_t 	timeCounterOverflowFLAG;
 volatile uint32_t DelayMsGlobal = 0;
@@ -31,17 +31,17 @@ int main (void) {
 	pinSetup();
 	sysTickSetup();
 	UART2_Setup(9600);
-	UART2_readUntil('\n'); // символ конца строки
+	UART2_readUntil('\n'); // СЃРёРјРІРѕР» РєРѕРЅС†Р° СЃС‚СЂРѕРєРё
 	
-	NVIC_EnableIRQ(SysTick_IRQn); 	// разрешаем прерывания от системного таймера	 
-	NVIC_EnableIRQ (UART2_IRQn);		// разрешаем прерывание по приёму/переполнению UART2
+	NVIC_EnableIRQ(SysTick_IRQn); 		// СЂР°Р·СЂРµС€Р°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РѕС‚ СЃРёСЃС‚РµРјРЅРѕРіРѕ С‚Р°Р№РјРµСЂР°		 
+	NVIC_EnableIRQ (UART2_IRQn);		// СЂР°Р·СЂРµС€Р°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїСЂРёС‘РјСѓ/РїРµСЂРµРїРѕР»РЅРµРЅРёСЋ UART2
 	
-	NVIC_SetPriority(SysTick_IRQn,0); // высший приоритет для прерываний системного таймера
+	NVIC_SetPriority(SysTick_IRQn,0); 	// РІС‹СЃС€РёР№ РїСЂРёРѕСЂРёС‚РµС‚ РґР»СЏ РїСЂРµСЂС‹РІР°РЅРёР№ СЃРёСЃС‚РµРјРЅРѕРіРѕ С‚Р°Р№РјРµСЂР°
 	
 	while(1) {
 		if(UART2_dataAvailable()) {
 			UART2_read();
-			protocolExecute(&uart2.dataRx[0]);	// отправляем принятый запрос на обработку
+			protocolExecute(&uart2.dataRx[0]);	// РѕС‚РїСЂР°РІР»СЏРµРј РїСЂРёРЅСЏС‚С‹Р№ Р·Р°РїСЂРѕСЃ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ
 			UART2_flush();	
 		}
 		sequinsExecute(&sequins);
@@ -49,7 +49,7 @@ int main (void) {
 	}
 }
 
- // функция задержки через прерывания системного таймера
+ // С„СѓРЅРєС†РёСЏ Р·Р°РґРµСЂР¶РєРё С‡РµСЂРµР· РїСЂРµСЂС‹РІР°РЅРёСЏ СЃРёСЃС‚РµРјРЅРѕРіРѕ С‚Р°Р№РјРµСЂР°
  void Delay_ms (uint32_t DelayValue) {
 	 DelayMsGlobal = DelayValue;
 	 while(DelayMsGlobal != 0) {};
@@ -65,11 +65,11 @@ int main (void) {
  } 
  
  void resetVariables (void) {
-	 // отладочные
+	 // РѕС‚Р»Р°РґРѕС‡РЅС‹Рµ
 	 debug.PA7state = 0;
 	 debug.PA6state = 0;
 	 
-	 // системные
+	 // СЃРёСЃС‚РµРјРЅС‹Рµ
 	 DelayMsGlobal = 0;
 	 
 	 // UART
@@ -84,26 +84,26 @@ int main (void) {
 	 uart2.simbol = 0x00;
 	 uart2.dataRxLenght = 0;
 	 
-	 // матрица пайеток
+	 // РјР°С‚СЂРёС†Р° РїР°Р№РµС‚РѕРє
 	 sequinsStructReset();
  }
  
- // обработка запроса
+ // РѕР±СЂР°Р±РѕС‚РєР° Р·Р°РїСЂРѕСЃР°
  void protocolExecute (uint8_t *request) {
-	 uint8_t stateLenght;	// количество байт в цифровой части сообщения
+	 uint8_t stateLenght;	// РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РІ С†РёС„СЂРѕРІРѕР№ С‡Р°СЃС‚Рё СЃРѕРѕР±С‰РµРЅРёСЏ
 	 uint8_t i;
 	 uint8_t *pointerTemp;
 	 
 	 
-	 int8_t temp = strLenght(request);				// смотрим сколько пришло байт
+	 int8_t temp = strLenght(request);				// СЃРјРѕС‚СЂРёРј СЃРєРѕР»СЊРєРѕ РїСЂРёС€Р»Рѕ Р±Р°Р№С‚
 	 temp -= 2; 														
-	 strTrim(request,temp);										// удаляем символ переноса строки и возврата каретки
+	 strTrim(request,temp);						// СѓРґР°Р»СЏРµРј СЃРёРјРІРѕР» РїРµСЂРµРЅРѕСЃР° СЃС‚СЂРѕРєРё Рё РІРѕР·РІСЂР°С‚Р° РєР°СЂРµС‚РєРё
 	 
-	 temp = strIndexOf(request,':');					// ищем символ-разделитель в принятой последовательности
+	 temp = strIndexOf(request,':');				// РёС‰РµРј СЃРёРјРІРѕР»-СЂР°Р·РґРµР»РёС‚РµР»СЊ РІ РїСЂРёРЅСЏС‚РѕР№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё
 	 
 	 
 	 
-	 if(temp < 0) 														// если разделителя нет, то это простой запрос
+	 if(temp < 0) 							// РµСЃР»Рё СЂР°Р·РґРµР»РёС‚РµР»СЏ РЅРµС‚, С‚Рѕ СЌС‚Рѕ РїСЂРѕСЃС‚РѕР№ Р·Р°РїСЂРѕСЃ
 	 {	
 				 if(strEquals(request,"AT",0,2)) {
 						 UART2_print("OK\r\n");
@@ -131,28 +131,28 @@ int main (void) {
 						UART2_print("OK\r\n");
 					}
 					
-					if(strEquals(request,"SetSequins",0,10))  // начинаем обновлять лист состояний пайеток
+					if(strEquals(request,"SetSequins",0,10))  // РЅР°С‡РёРЅР°РµРј РѕР±РЅРѕРІР»СЏС‚СЊ Р»РёСЃС‚ СЃРѕСЃС‚РѕСЏРЅРёР№ РїР°Р№РµС‚РѕРє
 					{
-                // парсим состояния пайеток и помещаем в массив с состояними, которые необходимо установить
+                // РїР°СЂСЃРёРј СЃРѕСЃС‚РѕСЏРЅРёСЏ РїР°Р№РµС‚РѕРє Рё РїРѕРјРµС‰Р°РµРј РІ РјР°СЃСЃРёРІ СЃ СЃРѕСЃС‚РѕСЏРЅРёРјРё, РєРѕС‚РѕСЂС‹Рµ РЅРµРѕР±С…РѕРґРёРјРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ
                 stateLenght = strLenght(request + temp + 1);
-                sequins.quantity = stateLenght;           // запоминаем количество пайеток
+                sequins.quantity = stateLenght;           // Р·Р°РїРѕРјРёРЅР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РїР°Р№РµС‚РѕРє
                 sequins.serial.counters.bitPointer = 0;
                 sequins.serial.counters.bytePointer = 0;
 						
-								//UART2_print("Sequins state: ");
+								
                 for(i = 0; i <= stateLenght; i++) 
                 {
                         char oneSimbol = strCharAt(request,temp + 1 + i);
                         if(oneSimbol == '1') {
-															//UART2_print("1");
+															
                               sequins.stateNew[sequins.serial.counters.bytePointer] |=(1<<sequins.serial.counters.bitPointer);
                         }
                         else if(oneSimbol == '0') {
-                              //UART2_print("0");
+                             
                               sequins.stateNew[sequins.serial.counters.bytePointer] &=(~(1<<sequins.serial.counters.bitPointer));
                         }
             
-                        // следим за указателями на массив
+                        // Г±Г«ГҐГ¤ГЁГ¬ Г§Г  ГіГЄГ Г§Г ГІГҐГ«ГїГ¬ГЁ Г­Г  Г¬Г Г±Г±ГЁГў
                         sequins.serial.counters.bitPointer++;
                         if(sequins.serial.counters.bitPointer > 7) 
 												{
@@ -160,24 +160,24 @@ int main (void) {
                           sequins.serial.counters.bytePointer++;
                         }
                 }
-								//UART2_printBin(&sequins.stateNew[0],3);
+						
                 UART2_print("OK\r\n");
                 return;
 					}
 
-					if(strEquals(request,"addSequins",0,10))  // продолжаем заполнять лист состояния пайеток
+					if(strEquals(request,"addSequins",0,10))  // РїСЂРѕРґРѕР»Р¶Р°РµРј Р·Р°РїРѕР»РЅСЏС‚СЊ Р»РёСЃС‚ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїР°Р№РµС‚РѕРє
 					{
-                // парсим состояния пайеток и помещаем в массив с состояними, которые необходимо установить
+
                 stateLenght = strLenght(request + temp + 1);
                 sequins.quantity += stateLenght;          
                 sequins.serial.counters.bitPointer--;
 						
-								//UART2_print("Sequins state: ");
+							
                 for(i = 0; i <= stateLenght; i++) 
                 {
                         char oneSimbol = strCharAt(request,temp + 1 + i);
                         if(oneSimbol == '1') {
-															//UART2_print("1");
+														
                               sequins.stateNew[sequins.serial.counters.bytePointer] |=(1<<sequins.serial.counters.bitPointer);
                         }
                         else if(oneSimbol == '0') {
@@ -185,7 +185,7 @@ int main (void) {
                               sequins.stateNew[sequins.serial.counters.bytePointer] &=(~(1<<sequins.serial.counters.bitPointer));
                         }
             
-                        // следим за указателями на массив
+                        // Г±Г«ГҐГ¤ГЁГ¬ Г§Г  ГіГЄГ Г§Г ГІГҐГ«ГїГ¬ГЁ Г­Г  Г¬Г Г±Г±ГЁГў
                         sequins.serial.counters.bitPointer++;
                         if(sequins.serial.counters.bitPointer > 7) 
 												{
@@ -193,25 +193,25 @@ int main (void) {
                           sequins.serial.counters.bytePointer++;
                         }
                 }
-								//UART2_printBin(&sequins.stateNew[0],3);
+								
                 UART2_print("OK\r\n");
                 return;
 					}					
 		}
  }
  
-   // обработчик прерывания от системного таймера (1кГц)
+   // РѕР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёСЏ РѕС‚ СЃРёСЃС‚РµРјРЅРѕРіРѕ С‚Р°Р№РјРµСЂР° (1РєР“С†)
  void SysTick_Handler (void) { 
-	 // состояние отладочных выводов
+	 // СЃРѕСЃС‚РѕСЏРЅРёРµ РѕС‚Р»Р°РґРѕС‡РЅС‹С… РІС‹РІРѕРґРѕРІ
 	 //MDR_PORTA->RXTX |=(PORT_Pin_7);
 	 //if(debug.PA7state == 0) MDR_PORTA->RXTX &=(~(PORT_Pin_7));	 else MDR_PORTA->RXTX |=(PORT_Pin_7);
 	 //if(uart2.dataTxCompliteFLAG == 0)  MDR_PORTA->RXTX &=(~(PORT_Pin_7));	 else MDR_PORTA->RXTX |=(PORT_Pin_7);
 	 if(debug.PA7state == 0) debug.PA7state = 1; else debug.PA7state = 0;	
 	 
-	 // счётчик времени для функции задержки
+	 // СЃС‡С‘С‚С‡РёРє РІСЂРµРјРµРЅРё РґР»СЏ С„СѓРЅРєС†РёРё Р·Р°РґРµСЂР¶РєРё
 	 if(DelayMsGlobal != 0) DelayMsGlobal--;	
 	 
-	   // счётчик времени для матрицы пайеток
+	   // СЃС‡С‘С‚С‡РёРє РІСЂРµРјРµРЅРё РґР»СЏ РјР°С‚СЂРёС†С‹ РїР°Р№РµС‚РѕРє
 		if(timeCounter > 0) {
 			  MDR_PORTA->RXTX |=(PORT_Pin_7);
 				timeCounterOverflowFLAG = 0;
@@ -222,11 +222,11 @@ int main (void) {
 			MDR_PORTA->RXTX &=(~(PORT_Pin_7));
 		}
 		
-		// что-то там про обновление матрицы...
-		// при каждом обновлении матрицы мы запускаем на выход посылку, содержащую команды для всех пайеток, по левую сторону от указателя
+		// С‡С‚Рѕ-С‚Рѕ С‚Р°Рј РїСЂРѕ РѕР±РЅРѕРІР»РµРЅРёРµ РјР°С‚СЂРёС†С‹...
+		// РїСЂРё РєР°Р¶РґРѕРј РѕР±РЅРѕРІР»РµРЅРёРё РјР°С‚СЂРёС†С‹ РјС‹ Р·Р°РїСѓСЃРєР°РµРј РЅР° РІС‹С…РѕРґ РїРѕСЃС‹Р»РєСѓ, СЃРѕРґРµСЂР¶Р°С‰СѓСЋ РєРѕРјР°РЅРґС‹ РґР»СЏ РІСЃРµС… РїР°Р№РµС‚РѕРє, РїРѕ Р»РµРІСѓСЋ СЃС‚РѕСЂРѕРЅСѓ РѕС‚ СѓРєР°Р·Р°С‚РµР»СЏ
 		if(sequins.matrix.counters.currentStep == 0) 
 		{
-      // процедуру запускаем только после того как завершилось предыдущее обносление и в главном цикле сбросили флаг завершения обновления матрицы
+      // РїСЂРѕС†РµРґСѓСЂСѓ Р·Р°РїСѓСЃРєР°РµРј С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ С‚РѕРіРѕ РєР°Рє Р·Р°РІРµСЂС€РёР»РѕСЃСЊ РїСЂРµРґС‹РґСѓС‰РµРµ РѕР±РЅРѕСЃР»РµРЅРёРµ Рё РІ РіР»Р°РІРЅРѕРј С†РёРєР»Рµ СЃР±СЂРѕСЃРёР»Рё С„Р»Р°Рі Р·Р°РІРµСЂС€РµРЅРёСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РјР°С‚СЂРёС†С‹
       if((sequins.FLAG.matrixUpdateStart == 1)&(sequins.FLAG.matrixUpdateComplite == 0)) {
         sequins.matrix.counters.currentStep = 1;
         sequins.matrix.counters.delayCounter = 0;        
@@ -234,14 +234,14 @@ int main (void) {
       
 		}
     
-		// смена логических уровней на линии данных пайеток
+		// СЃРјРµРЅР° Р»РѕРіРёС‡РµСЃРєРёС… СѓСЂРѕРІРЅРµР№ РЅР° Р»РёРЅРёРё РґР°РЅРЅС‹С… РїР°Р№РµС‚РѕРє
 		switch(sequins.matrix.counters.currentStep) 
 		{
-					case 0: // передача не производится, линия прижата к земле
+					case 0: // РїРµСЂРµРґР°С‡Р° РЅРµ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ, Р»РёРЅРёСЏ РїСЂРёР¶Р°С‚Р° Рє Р·РµРјР»Рµ
 							dataOFF;
 					break;
 
-					case 1: // начинаем передачу, подтягиваем линию данных к + на 3 такта
+					case 1: // РЅР°С‡РёРЅР°РµРј РїРµСЂРµРґР°С‡Сѓ, РїРѕРґС‚СЏРіРёРІР°РµРј Р»РёРЅРёСЋ РґР°РЅРЅС‹С… Рє + РЅР° 3 С‚Р°РєС‚Р°
 							dataON;
 							if(sequins.matrix.counters.delayCounter < 3) sequins.matrix.counters.delayCounter++;
 							else {
@@ -249,18 +249,18 @@ int main (void) {
 								sequins.matrix.counters.sequinsCounter = 0;
 								sequins.matrix.counters.bytePointer = 0;
 								sequins.matrix.counters.bitPointer = 0;
-								sequins.matrix.counters.currentStep = 2; // передача сообщения
+								sequins.matrix.counters.currentStep = 2; // РїРµСЂРµРґР°С‡Р° СЃРѕРѕР±С‰РµРЅРёСЏ
 								dataOFF;
 							}
 					break;
 
-					case 2: // передача основного сообщения, сообщение для каждой пайетки передаётся 3 такта (1 - всегда LOW, 3 - всегда HIGH, 2 - определяет состояние пайетки)
+					case 2: // РїРµСЂРµРґР°С‡Р° РѕСЃРЅРѕРІРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ, СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РєР°Р¶РґРѕР№ РїР°Р№РµС‚РєРё РїРµСЂРµРґР°С‘С‚СЃСЏ 3 С‚Р°РєС‚Р° (1 - РІСЃРµРіРґР° LOW, 3 - РІСЃРµРіРґР° HIGH, 2 - РѕРїСЂРµРґРµР»СЏРµС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ РїР°Р№РµС‚РєРё)
 						//MDR_PORTA->RXTX |=(PORT_Pin_7);
-							if(sequins.matrix.counters.sequinsCounter < (sequins.counters.sequinsCounter+1)) // следим чему равен счётчик пайеток
+							if(sequins.matrix.counters.sequinsCounter < (sequins.counters.sequinsCounter+1)) // СЃР»РµРґРёРј С‡РµРјСѓ СЂР°РІРµРЅ СЃС‡С‘С‚С‡РёРє РїР°Р№РµС‚РѕРє
 							{ 
-										if((sequins.state[sequins.matrix.counters.bytePointer] & (1<<sequins.matrix.counters.bitPointer)) != 0)   // читаем состояние пайетки
+										if((sequins.state[sequins.matrix.counters.bytePointer] & (1<<sequins.matrix.counters.bitPointer)) != 0)   // С‡РёС‚Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РїР°Р№РµС‚РєРё
 										{
-											sequins.matrix.timeLow = 2;   // в завивисомти от состояния указываем длительность состояния LOW на линии и общую длительность сообщения для одной пайетки
+											sequins.matrix.timeLow = 2;   // РІ Р·Р°РІРёРІРёСЃРѕРјС‚Рё РѕС‚ СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓРєР°Р·С‹РІР°РµРј РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ СЃРѕСЃС‚РѕСЏРЅРёСЏ LOW РЅР° Р»РёРЅРёРё Рё РѕР±С‰СѓСЋ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РґР»СЏ РѕРґРЅРѕР№ РїР°Р№РµС‚РєРё
 											sequins.matrix.timeTotal = 3;
 										}
 										else 
@@ -269,7 +269,7 @@ int main (void) {
 											sequins.matrix.timeTotal = 3;
 										}
 										
-										sequins.matrix.counters.delayCounter++; // счётчик времени для сообщения пайтки
+										sequins.matrix.counters.delayCounter++; // СЃС‡С‘С‚С‡РёРє РІСЂРµРјРµРЅРё РґР»СЏ СЃРѕРѕР±С‰РµРЅРёСЏ РїР°Р№С‚РєРё
 										if(sequins.matrix.counters.delayCounter < sequins.matrix.timeLow)        dataOFF;
 										else if(sequins.matrix.counters.delayCounter < sequins.matrix.timeTotal) dataON;
 										else 
@@ -278,7 +278,7 @@ int main (void) {
 																																										sequins.matrix.counters.delayCounter = 0;
 																																										sequins.matrix.counters.bitPointer++;
 																																												
-																																										// сдедим за указателями на массив
+																																										// СЃРґРµРґРёРј Р·Р° СѓРєР°Р·Р°С‚РµР»СЏРјРё РЅР° РјР°СЃСЃРёРІ
 																																										if(sequins.matrix.counters.bitPointer > 7) {
 																																												sequins.matrix.counters.bitPointer = 0;
 																																												sequins.matrix.counters.bytePointer++;
@@ -297,7 +297,7 @@ int main (void) {
 								//MDR_PORTA->RXTX &=(~(PORT_Pin_7));
 					break;
 
-					case 3:   // конец сообщения для матрицы обрамляется прижатой на 4 такта к земле линией данных
+					case 3:   // РѕРЅРµС† СЃРѕРѕР±С‰РµРЅРёСЏ РґР»СЏ РјР°С‚СЂРёС†С‹ РѕР±СЂР°РјР»СЏРµС‚СЃСЏ РїСЂРёР¶Р°С‚РѕР№ РЅР° 4 С‚Р°РєС‚Р° Рє Р·РµРјР»Рµ Р»РёРЅРёРµР№ РґР°РЅРЅС‹С…
 							dataOFF;  
 					MDR_PORTA->RXTX |=(PORT_Pin_7);
 							if(sequins.matrix.counters.delayCounter < 1) sequins.matrix.counters.delayCounter++;
@@ -305,7 +305,7 @@ int main (void) {
 								sequins.matrix.counters.delayCounter = 0;
 								sequins.matrix.counters.currentStep = 0;
 								
-								sequins.FLAG.matrixUpdateComplite = 1;  // флаг окончания обновления матрицы
+								sequins.FLAG.matrixUpdateComplite = 1;  // С„Р»Р°Рі РѕРєРѕРЅС‡Р°РЅРёСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РјР°С‚СЂРёС†С‹
 							}
 					MDR_PORTA->RXTX &=(~(PORT_Pin_7));
 					break;
