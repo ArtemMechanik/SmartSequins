@@ -4,3 +4,6 @@
 
 3D модель печатной платы
 ![3D модель](https://github.com/ArtemMechanik/SmartSequins/blob/main/Mk.9/source/smarSequins9%203D.jpg)
+
+Печатные платы в сборе
+![Платы в сборе](https://github.com/ArtemMechanik/SmartSequins/blob/main/Mk.9/source/Платы%20в%20сборе.jpg)
