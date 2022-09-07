@@ -12,8 +12,8 @@
 #define FORWRD   1
 #define BACKWARD 2
 
-#define DEADTIME 	30
-#define PHASE_DEL 	80
+#define DEADTIME 	5
+#define PHASE_DEL 	20
 
 // stepper control variable
 BYTE motorDirection = STOP;
@@ -26,7 +26,7 @@ BYTE stepCounter = 0;
 BYTE algoritmStep		= 0;
 BYTE timerReset			= 0;
 WORD erorrTime			= 500;
-WORD startTime			= 300;
+WORD startTime			= 275; // correct for wake-up time
 WORD stopTime			= 300;
 BYTE sequnsStateTime	= 200;
 WORD timerCounter		= 0;
@@ -35,10 +35,14 @@ WORD timerCounter		= 0;
 BYTE sequinStatePrev = 0;
 BYTE sequinState = 0;
 BYTE dataInState = 0;
+BYTE dataOutState = 0;
+BYTE changeComplite	 = 1;
 
 void	FPPA0 (void)
 {
 	.ADJUST_IC	SYSCLK=IHRC/2, IHRC=16MHz, Init_RAM	
+
+	
 
 	// pin state for all phase of step
 	stepperPhase[1] = (0<<AP)|(0<<AN)|(1<<BN)|(0<<BP);
@@ -56,17 +60,19 @@ void	FPPA0 (void)
 	pntEND = & stepperPhase[9];
 	phaseCounter = pntStart+1;
 
-
+	MISC	= 0b00100000; // enable fast wake-up MISC.5 = 1
 	GPCC.7	= 0;			// comparator disable
 	INTEN 	= 0b00000000;	// disable all interrupt
 
+	PADIER	= 0b00000000;	// disable all wake-up event from portA
 	PA		= 0b00000000;
-	PAC 	= 0b11101000;	
+	PAC 	= 0b11111000;	// PA4 - data out	
 	PAPH	= 0b00010000;	
 
+	PBDIER 	= 0b00000001; 	// wake-up event from PB.0
 	PB		= 0b00000000;
-	PBC		= 0b00000000;
-	PBPH	= 0b00000001;	// PB0 pull-high 
+	PBC		= 0b00000000;	// PB0 - data in
+	PBPL	= 0b00000001;	// PB0 pull-low 
 
 	// timer 2 setup
 	TM2S 	= 0b01111111;	// 8 bit, prescaller = 64, scalar = 32
@@ -84,6 +90,13 @@ void	FPPA0 (void)
 
 	while (1)
 	{
+		// sleep mode enter
+		if((algoritmStep == 0) && (changeComplite == 1))
+		{
+			STOPSYS;
+			// wake-up time = 700uS
+		}
+
 		// check data in pin
 		if(PB.0 == 0) {
 			dataInState = 0;
@@ -117,7 +130,7 @@ void	FPPA0 (void)
 			break;
 
 			case 2:
-				//PA.3 = 1;
+				dataOutState = 1;
 				if(timerCounter > sequnsStateTime) {
 					algoritmStep = 3;
 				}
@@ -142,16 +155,17 @@ void	FPPA0 (void)
 				}
 				if(timerCounter > erorrTime) {
 					algoritmStep = 0;
+					sequinState =  sequinStatePrev;
 				}
 			break;
 
 			case 5:	
 				if(dataInState == 1) {
-					//PA.3 = 1;
+					dataOutState = 1;
 					timerReset = 1;
 				}
 				else {
-					//PA.3 = 0;
+					dataOutState = 0;
 				}
 
 				if(timerCounter > stopTime) {
@@ -161,6 +175,13 @@ void	FPPA0 (void)
 			
 		}
 
+		// data out control
+		if(dataOutState == 1) {
+			PA.4 = 1;
+		}
+		else {
+			PA.4 = 0;
+		}
 
 		// timer
 		if(timerReset == 1) {
@@ -183,14 +204,6 @@ void	FPPA0 (void)
 
 			sequinStatePrev = sequinState;
 		}
-/*
-		if(sequinState == 0) {
-			PA.6 = 1;
-		}
-		else {
-			PA.6 = 0;
-		}
-*/		
 	
 		
 	}
@@ -208,7 +221,8 @@ void	Interrupt (void)
 		
 		// repeat while step counter > 0
 		if(stepCounter == 0) 
-		{
+		{			
+			changeComplite = 1;
 			motorDirection = STOP;
 			PA = (PA & 0b00010111);
 		}
@@ -248,6 +262,8 @@ void	Interrupt (void)
 			PA = (PA & 0b00010111) | (*phaseCounter);
 
 			stepCounter -= 1;
+
+			changeComplite = 0;
 			
 		}
 		
