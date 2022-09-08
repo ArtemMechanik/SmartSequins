@@ -12,8 +12,8 @@
 #define FORWRD   1
 #define BACKWARD 2
 
-#define DEADTIME 	5
-#define PHASE_DEL 	20
+#define DEADTIME 	3
+#define PHASE_DEL 	15
 
 // stepper control variable
 BYTE motorDirection = STOP;
@@ -28,7 +28,7 @@ BYTE timerReset			= 0;
 WORD erorrTime			= 500;
 WORD startTime			= 275; // correct for wake-up time
 WORD stopTime			= 300;
-BYTE sequnsStateTime		= 200;
+BYTE sequnsStateTime	= 200;
 WORD timerCounter		= 0;
 
 // sequin
@@ -36,11 +36,11 @@ BYTE sequinStatePrev = 0;
 BYTE sequinState = 0;
 BYTE dataInState = 0;
 BYTE dataOutState = 0;
-BYTE changeComplite = 1;
+BYTE changeComplite	 = 1;
 
 void	FPPA0 (void)
 {
-	.ADJUST_IC	SYSCLK=IHRC/2, IHRC=16MHz, Init_RAM	// F_CPU = 8MHz
+	.ADJUST_IC	SYSCLK=IHRC/2, IHRC=16MHz, Init_RAM	
 
 	// pin state for all phase of step
 	stepperPhase[1] = (0<<AP)|(0<<AN)|(1<<BN)|(0<<BP);
@@ -58,18 +58,18 @@ void	FPPA0 (void)
 	pntEND = & stepperPhase[9];
 	phaseCounter = pntStart+1;
 
-	MISC	= 0b00100000;   // enable fast wake-up MISC.5 = 1
-	GPCC.7	= 0;		// comparator disable
+	MISC	= 0b00100000; // enable fast wake-up MISC.5 = 1
+	GPCC.7	= 0;			// comparator disable
 	INTEN 	= 0b00000000;	// disable all interrupt
 
 	PADIER	= 0b00000000;	// disable all wake-up event from portA
-	PA	= 0b00000000;
+	PA		= 0b00000000;
 	PAC 	= 0b11111000;	// PA4 - data out	
 	PAPH	= 0b00010000;	
 
 	PBDIER 	= 0b00000001; 	// wake-up event from PB.0
-	PB	= 0b00000000;
-	PBC	= 0b00000000;	// PB0 - data in
+	PB		= 0b00000000;
+	PBC		= 0b00000000;	// PB0 - data in
 	PBPL	= 0b00000001;	// PB0 pull-low 
 
 	// timer 2 setup
@@ -84,7 +84,7 @@ void	FPPA0 (void)
 	INTEN	= 0b01000000;	// timer2 interrupt, external interrupt PB.0 an all logical change
 	INTEGS	= 0b00000000;
 
-	ENGINT;			// global interrupt enable 
+	ENGINT;	// global interrupt enable 
 
 	while (1)
 	{
@@ -198,7 +198,7 @@ void	FPPA0 (void)
 			else {
 				motorDirection = BACKWARD;
 			}
-			stepCounter = 50;
+			stepCounter = 35;
 
 			sequinStatePrev = sequinState;
 		}
@@ -211,7 +211,8 @@ void	FPPA0 (void)
 void	Interrupt (void)
 {
 	pushaf;
-	
+
+	//PA.6 = 1; // strob ON
 	// timer 2 interrupt drive stepper motor
 	if (Intrq.TM2)
 	{	
@@ -270,10 +271,14 @@ void	Interrupt (void)
 		
 	}
 
+	// PB0 use fo interface
 	if (Intrq.PB0)
 	{	
+		// falling edge
 		Intrq.PB0	=	0;
 	}
+
+	//PA.6 = 0;	// strob OFF
 
 	popaf;
 }
