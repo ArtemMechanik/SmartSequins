@@ -49,6 +49,7 @@ void setup () {
 
 void draw () {
   background(backgroundColor);
+  
   // команада на открытие файла, вызываем окно для выбора файла
   if(selectFile == 1) {
     selectInput("Select a file to process:", "readfileSelected");   
@@ -136,17 +137,16 @@ void draw () {
   // но он позволяет прорисовывать GUI отдельно от 3D объектов
   hint(ENABLE_DEPTH_TEST);
   pushMatrix();
-  background(backgroundColor);
     translate(camX, camY, camZ);            // вращаем камеру вокруг модели        
     rotateX(rotX);
     rotateZ((rotZ));
     
     // парсим файл и ищем команды G1 - рабочее перемещение 
-    
     layerNumber = -1;
     layerHigh = 0;
     for (int i = 0; i<GcodetLines.length; i++) {  // ищем нужную строку в массиве
       if((GcodetLines[i].indexOf("G1") != -1)|(GcodetLines[i].indexOf("G0") != -1)) {
+          // ищем X
           startNumber = GcodetLines[i].indexOf("X");
           if(startNumber != -1) {
               endNumber   = GcodetLines[i].indexOf(" ",startNumber);
@@ -175,13 +175,13 @@ void draw () {
               else                Z_coordinates = GcodetLines[i].substring(++startNumber);
               line[0][2] = float(Z_coordinates)*scaleValue;
               if((layerHigh + line[0][2]) > layerHigh) {
-                layerHigh += line[0][2];
-                layerNumber += 1;
+                  layerHigh += line[0][2];
+                  layerNumber += 1;
               }
               
               // отрисовываем паузу
               if(setPause == 1) {
-                if(layerNumber > selectedLayer) {
+                if(layerNumber >= selectedLayer) {
                   line[0][2] += 20;
                 }
               }
@@ -196,15 +196,18 @@ void draw () {
           }
           
           // корректируем элементы оформления
-          if(layerNumber == selectedLayer) stroke(color(255,0,0));
-          else if(layerNumber > selectedLayer) {
+          if(layerNumber == selectedLayer)  
+            stroke(color(255,0,0));
+          else if(layerNumber >= selectedLayer)
+          {
             if(setPause == 1) stroke(#0DCAFC);
             else              stroke(255);
           }
-          else stroke(255);
+          else                stroke(255);
           
           // отрисовываем линию траектории
-          if(GcodetLines[i].indexOf("G1") != -1) line(line[0][0],line[0][1],line[0][2],line[1][0],line[1][1],line[1][2]);
+          if(GcodetLines[i].indexOf("G1") != -1) 
+            line(line[0][0],line[0][1],line[0][2],line[1][0],line[1][1],line[1][2]);
           
           // сохраняем координаты начал отрезка
           line[1][0] = line[0][0];
@@ -237,21 +240,21 @@ void draw () {
     output_file.close();
     
     println("file was write!");
+    selectFile = 3; // для корректного отображения модельки заново читаем исходный файл
     selectOutputFile = 0;
   }
   
   // перед отрисовкой GUI, выключаем метод
   hint(DISABLE_DEPTH_TEST);
+  drawGUI();
 }
 
 // начальное положение камеры
 void defaultCameraPosition () {
       // делаем так, чтобы модель пометилась во всю ширину экрана
-
-        camX=width/2 - (X_min + X_max)/2;
-        camY=height/2 - (Y_min + Y_max)/2;
-        camZ = (Z_max - Z_min)/20;
-
+      camX=width/2 - (X_min + X_max)/2;
+      camY=height/2 - (Y_min + Y_max)/2;
+      camZ = (Z_max - Z_min)/20;
       rotX=radians(45);
       rotZ = 0;
 }

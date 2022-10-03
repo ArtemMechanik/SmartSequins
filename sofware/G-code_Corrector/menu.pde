@@ -6,28 +6,28 @@ void menuSetup() {
    menu.addButton("button1") // открыть исходный файл
      .setValue(100)
      .setPosition(10,10)
-     .setSize(200,40)
+     .setSize(210,40)
      .setLabel("ОТКРЫТЬ");
      ;
       
    menu.addButton("button2") // разнести слои
      .setValue(100)
-     .setPosition(10,60)
-     .setSize(200,40)
+     .setPosition(10,50)
+     .setSize(210,40)
      .setLabel("РАЗНЕСТИ");
      ;
      
    menu.addButton("button3") // вставить паузу в указанном месте
      .setValue(100)
-     .setPosition(10,110)
-     .setSize(200,40)
+     .setPosition(10,90)
+     .setSize(210,40)
      .setLabel("ВСТАВИТЬ ПАУЗУ");
      ;
      
    menu.addButton("button4") // запись файла
      .setValue(100)
-     .setPosition(10,170)
-     .setSize(200,40)
+     .setPosition(10,130)
+     .setSize(210,40)
      .setLabel("ЗАПИСАТЬ ФАЙЛ");
      ;
 }
@@ -71,4 +71,21 @@ void keyPressed() {
 
 void keyReleased() {
   currentKeyCode = 0;
+}
+
+void drawGUI () {
+  fill(255);
+  stroke(255);
+  textSize(20);
+  
+  // информация о версии
+  text("version: 1.1", width - 140, height - 10);
+  
+  textSize(20);
+  if(layerNumber < 0) layerNumber = 0;
+  text("количество слоёв: " + layerNumber, 10, 200);
+  
+  if(setPause != 0) 
+    text("пауза после слоя: " + selectedLayer, 10, 230);
+  
 }
