@@ -86,6 +86,6 @@ void drawGUI () {
   text("количество слоёв: " + layerNumber, 10, 200);
   
   if(setPause != 0) 
-    text("пауза после слоя: " + selectedLayer, 10, 230);
+    text("пауза перед слоем: " + selectedLayer, 10, 230);
   
 }

@@ -71,11 +71,17 @@ void draw () {
   }
   
   // обработка нового файла
+  // ищем строки ;LAYER:X 
   if(newFileLoadFLAG == 1) {
     // анализируем файл перед его отрисовкой, чтобы определить параметры камеры
-    layerNumber = -1;
+    layerNumber = 0;    
     layerHigh = 0;
+    
     for (int i = 0; i<GcodetLines.length; i++) {  // ищем нужную строку в массиве
+      if(GcodetLines[i].indexOf(";LAYER:") != -1) {
+          layerNumber += 1;
+      }
+        
       if((GcodetLines[i].indexOf("G1") != -1)|(GcodetLines[i].indexOf("G0") != -1)) {
           startNumber = GcodetLines[i].indexOf("X");
           if(startNumber != -1) {
@@ -108,11 +114,6 @@ void draw () {
               if(endNumber != -1) Z_coordinates = GcodetLines[i].substring(++startNumber,endNumber);
               else                Z_coordinates = GcodetLines[i].substring(++startNumber);
               line[0][2] = float(Z_coordinates)*scaleValue;
-              // считаем слом
-              if((layerHigh + line[0][2]) > layerHigh) {
-                layerHigh += line[0][2];
-                layerNumber += 1;
-              }
               if(line[0][2] > Z_max) Z_max = line[0][2];
               if(line[0][2] < Z_min) Z_min = line[0][2];
           }
@@ -142,9 +143,12 @@ void draw () {
     rotateZ((rotZ));
     
     // парсим файл и ищем команды G1 - рабочее перемещение 
-    layerNumber = -1;
+    layerNumber = 0;
     layerHigh = 0;
     for (int i = 0; i<GcodetLines.length; i++) {  // ищем нужную строку в массиве
+      if(GcodetLines[i].indexOf(";LAYER:") != -1) {
+          layerNumber += 1;
+      }
       if((GcodetLines[i].indexOf("G1") != -1)|(GcodetLines[i].indexOf("G0") != -1)) {
           // ищем X
           startNumber = GcodetLines[i].indexOf("X");
@@ -174,10 +178,6 @@ void draw () {
               if(endNumber != -1) Z_coordinates = GcodetLines[i].substring(++startNumber,endNumber);
               else                Z_coordinates = GcodetLines[i].substring(++startNumber);
               line[0][2] = float(Z_coordinates)*scaleValue;
-              if((layerHigh + line[0][2]) > layerHigh) {
-                  layerHigh += line[0][2];
-                  layerNumber += 1;
-              }
               
               // отрисовываем паузу
               if(setPause == 1) {
@@ -227,8 +227,8 @@ void draw () {
   
   if(selectOutputFile == 3) {
     // вносим изменения в файл
-    GcodetLines = splice(GcodetLines,"M25",targetStringNumber);      // ставим на паузу
-    GcodetLines = splice(GcodetLines,"G0 Z20",targetStringNumber+1);  // приподнимаем экструдер
+    GcodetLines = splice(GcodetLines,"M25",targetStringNumber-2);      // ставим на паузу
+    GcodetLines = splice(GcodetLines,"G0 Z20",targetStringNumber-1);  // приподнимаем экструдер
     // не понятно почему, но эти команды должны идти именно в таком порядке... Иначе пауза не отрабатавается сразу, а экструдер опускается
     
     // создаём файл с указанным именем по указанному адресу outputFileAbsolutePath
